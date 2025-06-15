@@ -1,6 +1,6 @@
 // Ganti dengan kredensial Supabase-mu
 const SUPABASE_URL = 'https://ctggbrmvubjggyxmmbse.supabase.co';
-const SUPABASE_KEY = 'YOUR_SUPABASE_PUBLIC_ANON_KEY';
+const SUPABASE_KEY = 'NvyajrMs+Hv9c982LMcDJeDRl0Lbuq7qTySnV0WYkuyX8Nm9LbH+3/5V/A8MzrH8ZOAGmJB86QCI/uQYgJarSg==';
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
