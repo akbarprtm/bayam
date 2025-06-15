@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Monitoring Kelembaban</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 p-4">
+  <div class="max-w-xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">🌱 Dashboard Monitoring Tanaman</h1>
+
+    <div class="bg-white shadow p-4 rounded mb-4">
+      <p class="text-lg font-semibold">Kelembaban Tanah Saat Ini:</p>
+      <p id="kelembaban" class="text-4xl text-green-600">--%</p>
+    </div>
+
+    <div class="bg-white shadow p-4 rounded mb-4">
+      <p class="text-lg font-semibold">Waktu Penyiraman Terakhir:</p>
+      <p id="waktuPenyiraman" class="text-xl">--</p>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
