@@ -24,13 +24,21 @@ function initChart() {
     },
     options: {
       responsive: true,
+      plugins: {
+        legend: {
+          labels: { color: '#4B5563' }
+        }
+      },
       scales: {
         x: {
           ticks: {
             color: '#4B5563',
-            maxRotation: 45,
-            minRotation: 0,
-            autoSkip: true
+            maxRotation: 0,
+            callback: function(value, index, ticks) {
+              const label = this.getLabelForValue(value);
+              const [datePart, timePart] = label.split(' ');
+              return [datePart, timePart]; // tampilkan dalam 2 baris
+            }
           }
         },
         y: {
@@ -78,13 +86,9 @@ async function fetchChartData() {
     const reversed = data.reverse(); // urut waktu naik
     kelembapanChart.data.labels = reversed.map(item => {
       const waktu = new Date(item.waktu);
-      return waktu.toLocaleString('id-ID', {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).replace(',', ''); // hasil: "15/06 14.23"
+      const tanggal = waktu.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', yaear: '2-digit' });
+      const jam = waktu.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      return `${tanggal} ${jam}`; // akan di-split jadi 2 baris di label
     });
 
     kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
