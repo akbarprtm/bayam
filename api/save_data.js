@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_KEY;
-  const table = process.env.SUPABASE_TABLE_KELEMBABAN;
+  const table = "sensor_data"; // ganti langsung jadi "sensor_data"
 
   let kelembapan;
 
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
         'Prefer': 'return=representation'
       },
       body: JSON.stringify({
-        nilai: parseInt(kelembapan),
+        kelembapan: parseInt(kelembapan), // ubah kolom jadi "kelembapan"
         waktu: new Date().toISOString()
       })
     });
