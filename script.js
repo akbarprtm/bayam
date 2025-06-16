@@ -40,7 +40,7 @@ function initChart() {
 // Ambil data terakhir
 async function fetchLatestData() {
   const { data: kelembapan, error: err1 } = await supabase
-    .from('kelembapan')
+    .from('sensor_data')
     .select('*')
     .order('waktu', { ascending: false })
     .limit(1);
@@ -64,7 +64,7 @@ async function fetchLatestData() {
 // Ambil 7 data terakhir untuk chart
 async function fetchChartData() {
   const { data, error } = await supabase
-    .from('kelembapan')
+    .from('sensor_data')
     .select('*')
     .order('waktu', { ascending: false })
     .limit(7);
@@ -82,7 +82,7 @@ async function fetchChartData() {
 // Realtime listener (kelembapan)
 supabase
   .channel('public:kelembapan')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'kelembapan' }, payload => {
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'sensor_data' }, payload => {
     fetchLatestData();
     fetchChartData();
   })
