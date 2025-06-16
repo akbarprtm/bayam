@@ -3,8 +3,39 @@ const SUPABASE_URL = 'https://ctggbrmvubjggyxmmbse.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA';
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Buat chart
+let kelembabanChart;
+function initChart() {
+  const ctx = document.getElementById('chartKelembaban').getContext('2d');
+  kelembabanChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [], // waktu
+      datasets: [{
+        label: 'Kelembaban (%)',
+        data: [],
+        fill: true,
+        borderColor: 'rgb(34,197,94)',
+        backgroundColor: 'rgba(34,197,94,0.2)',
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          ticks: { color: '#4B5563' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#4B5563' }
+        }
+      }
+    }
+  });
+}
 
 // Ambil data terakhir
 async function fetchLatestData() {
@@ -30,14 +61,34 @@ async function fetchLatestData() {
   }
 }
 
+// Ambil 7 data terakhir untuk chart
+async function fetchChartData() {
+  const { data, error } = await supabase
+    .from('kelembaban')
+    .select('*')
+    .order('waktu', { ascending: false })
+    .limit(7);
+
+  if (data) {
+    const reversed = data.reverse(); // agar urut waktu naik
+    kelembabanChart.data.labels = reversed.map(item =>
+      new Date(item.waktu).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+    );
+    kelembabanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
+    kelembabanChart.update();
+  }
+}
+
 // Realtime listener (kelembaban)
 supabase
   .channel('public:kelembaban')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'kelembaban' }, payload => {
     fetchLatestData();
+    fetchChartData();
   })
   .subscribe();
 
+// Realtime listener (penyiraman)
 supabase
   .channel('public:penyiraman')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'penyiraman' }, payload => {
@@ -45,4 +96,6 @@ supabase
   })
   .subscribe();
 
+initChart();
 fetchLatestData();
+fetchChartData();
