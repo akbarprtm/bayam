@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_KEY;
+  const supabaseUrl = 'https://ctggbrmvubjggyxmmbse.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyNTE4NDcsImV4cCI6MjA2MzgyNzg0N30.6la5T8_8wrme55wKM7_r7kA6SO90-ht8JlP8aE3C6UA';
   const table = "sensor_data"; // ganti langsung jadi "sensor_data"
-
+  
   let kelembapan;
 
   if (req.method === 'GET') {
