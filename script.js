@@ -6,15 +6,15 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Buat chart
-let kelembabanChart;
+let kelembapanChart;
 function initChart() {
-  const ctx = document.getElementById('chartKelembaban').getContext('2d');
-  kelembabanChart = new Chart(ctx, {
+  const ctx = document.getElementById('chartKelembapan').getContext('2d');
+  kelembapanChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: [], // waktu
       datasets: [{
-        label: 'Kelembaban (%)',
+        label: 'Kelembapan (%)',
         data: [],
         fill: true,
         borderColor: 'rgb(34,197,94)',
@@ -39,7 +39,7 @@ function initChart() {
 
 // Ambil data terakhir
 async function fetchLatestData() {
-  const { data: kelembaban, error: err1 } = await supabase
+  const { data: kelembapan, error: err1 } = await supabase
     .from('kelembaban')
     .select('*')
     .order('waktu', { ascending: false })
@@ -51,8 +51,8 @@ async function fetchLatestData() {
     .order('waktu', { ascending: false })
     .limit(1);
 
-  if (kelembaban && kelembaban.length > 0) {
-    document.getElementById('kelembaban').textContent = kelembaban[0].kelembapan + '%';
+  if (kelembapan && kelembapan.length > 0) {
+    document.getElementById('kelembapan').textContent = kelembapan[0].kelembapan + '%';
   }
 
   if (penyiraman && penyiraman.length > 0) {
@@ -71,15 +71,15 @@ async function fetchChartData() {
 
   if (data) {
     const reversed = data.reverse(); // agar urut waktu naik
-    kelembabanChart.data.labels = reversed.map(item =>
+    kelembapanChart.data.labels = reversed.map(item =>
       new Date(item.waktu).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
     );
-    kelembabanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
-    kelembabanChart.update();
+    kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
+    kelembapanChart.update();
   }
 }
 
-// Realtime listener (kelembaban)
+// Realtime listener (kelembapan)
 supabase
   .channel('public:kelembaban')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'kelembaban' }, payload => {
