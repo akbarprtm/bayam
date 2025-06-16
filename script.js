@@ -26,14 +26,29 @@ function initChart() {
       responsive: true,
       scales: {
         x: {
-          ticks: { color: '#4B5563' }
+          ticks: {
+            color: '#4B5563',
+            callback: function(value, index, ticks) {
+              const label = this.getLabelForValue(value);
+              // Pisahkan label menjadi 2 baris
+              return label.replace(' ', '\n');
+            }
+          }
         },
         y: {
           beginAtZero: true,
           ticks: { color: '#4B5563' }
         }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#4B5563'
+          }
+        }
       }
     }
+
   });
 }
 
