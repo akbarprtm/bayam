@@ -86,8 +86,8 @@ async function fetchChartData() {
     const reversed = data.reverse(); // urut waktu naik
     kelembapanChart.data.labels = reversed.map(item => {
       const waktu = new Date(item.waktu);
-      const tanggal = waktu.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', yaear: '2-digit' });
-      const jam = waktu.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      const tanggal = waktu.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
+      const jam = waktu.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       return `${tanggal} ${jam}`; // akan di-split jadi 2 baris di label
     });
 
