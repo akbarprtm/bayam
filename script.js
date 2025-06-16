@@ -72,7 +72,13 @@ async function fetchChartData() {
   if (data) {
     const reversed = data.reverse(); // agar urut waktu naik
     kelembapanChart.data.labels = reversed.map(item =>
-      new Date(item.waktu).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      new Date(item.waktu).toLocaleString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     );
     kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
     kelembapanChart.update();
