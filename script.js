@@ -27,14 +27,14 @@ function initChart() {
       scales: {
         x: {
           ticks: {
-            color: '#4B5563',
+            maxTicksLimit: 5,
             callback: function(value, index, ticks) {
               const label = this.getLabelForValue(value);
-              // Pisahkan label menjadi 2 baris
-              return label.replace(' ', '\n');
+              return label.replace(' pukul ', '\n');
             }
           }
-        },
+        }
+
         y: {
           beginAtZero: true,
           ticks: { color: '#4B5563' }
