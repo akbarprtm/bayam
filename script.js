@@ -81,6 +81,7 @@ async function fetchChartData() {
       return waktu.toLocaleString('id-ID', {
         day: '2-digit',
         month: '2-digit',
+        year: '2-digit',
         hour: '2-digit',
         minute: '2-digit'
       }).replace(',', ''); // hasil: "15/06 14.23"
