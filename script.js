@@ -33,7 +33,7 @@ function initChart() {
               return label.replace(' pukul ', '\n');
             }
           }
-        }
+        },
 
         y: {
           beginAtZero: true,
