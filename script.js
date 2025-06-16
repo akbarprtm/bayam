@@ -3,9 +3,10 @@ const SUPABASE_URL = 'https://ctggbrmvubjggyxmmbse.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA';
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Buat chart
+// Buat chart kelembapan
 let kelembapanChart;
 function initChart() {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
@@ -26,14 +27,7 @@ function initChart() {
       responsive: true,
       scales: {
         x: {
-          ticks: {
-            color: '#4B5563',
-            callback: function(value, index, ticks) {
-              const label = this.getLabelForValue(value);
-              // Pisahkan label menjadi 2 baris
-              return label.replace(' pukul ', '\n');
-            }
-          }
+          ticks: { color: '#4B5563' }
         },
         y: {
           beginAtZero: true,
@@ -48,7 +42,6 @@ function initChart() {
         }
       }
     }
-
   });
 }
 
@@ -76,7 +69,7 @@ async function fetchLatestData() {
   }
 }
 
-// Ambil 7 data terakhir untuk chart
+// Ambil data untuk grafik
 async function fetchChartData() {
   const { data, error } = await supabase
     .from('sensor_data')
@@ -86,30 +79,33 @@ async function fetchChartData() {
 
   if (data) {
     const reversed = data.reverse(); // agar urut waktu naik
-    kelembapanChart.data.labels = reversed.map(item =>
-      new Date(item.waktu).toLocaleString('id-ID', {
+    kelembapanChart.data.labels = reversed.map(item => {
+      const waktu = new Date(item.waktu);
+      return waktu.toLocaleString('id-ID', {
         day: '2-digit',
-        month: 'long',
+        month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
-      })
-    );
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    });
+
     kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
     kelembapanChart.update();
   }
 }
 
-// Realtime listener (kelembapan)
+// Realtime listener untuk kelembapan
 supabase
-  .channel('public:kelembapan')
+  .channel('public:sensor_data')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'sensor_data' }, payload => {
     fetchLatestData();
     fetchChartData();
   })
   .subscribe();
 
-// Realtime listener (penyiraman)
+// Realtime listener untuk penyiraman
 supabase
   .channel('public:penyiraman')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'penyiraman' }, payload => {
@@ -117,6 +113,7 @@ supabase
   })
   .subscribe();
 
+// Inisialisasi
 initChart();
 fetchLatestData();
 fetchChartData();
