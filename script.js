@@ -27,21 +27,18 @@ function initChart() {
       responsive: true,
       scales: {
         x: {
-          ticks: { color: '#4B5563' }
+          ticks: {
+            color: '#4B5563',
+            maxRotation: 45,
+            minRotation: 0,
+            autoSkip: true
+          }
         },
         y: {
           beginAtZero: true,
           ticks: { color: '#4B5563' }
         }
-      },
-      plugins: {
-        legend: {
-          labels: {
-            color: '#4B5563'
-          }
-        }
       }
-    }
   });
 }
 
@@ -84,12 +81,11 @@ async function fetchChartData() {
       return waktu.toLocaleString('id-ID', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric',
         hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
+        minute: '2-digit'
+      }).replace(',', '');
     });
+
 
     kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
     kelembapanChart.update();
