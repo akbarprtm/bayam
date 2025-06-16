@@ -5,9 +5,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'metode, durasi, dan waktu harus disediakan' });
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_KEY;
-  const table = process.env.SUPABASE_TABLE_PENYIRAMAN;
+  const supabaseUrl = 'https://ctggbrmvubjggyxmmbse.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyNTE4NDcsImV4cCI6MjA2MzgyNzg0N30.6la5T8_8wrme55wKM7_r7kA6SO90-ht8JlP8aE3C6UA';
+  const table = "penyiraman"; // ganti langsung jadi "sensor_data"
 
   try {
     const response = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
