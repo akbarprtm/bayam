@@ -106,6 +106,13 @@ async function fetchChartData() {
   }
 }
 
+// Auto-refresh setiap 5 detik
+    setInterval(() => {
+      fetchLatestData();
+      fetchChartData();
+      console.log('🔄 Auto-refresh 5 detik...');
+    }, 5000);
+
 // Panggil awal
 initChart();
 fetchLatestData();
