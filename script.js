@@ -105,7 +105,36 @@ async function fetchChartData() {
     kelembapanChart.update();
   }
 }
+async function fetchSensorTable(limit = 10) {
+      const { data, error } = await supabase
+        .from("sensor_data")
+        .select("*")
+        .order("waktu", { ascending: false })
+        .limit(limit);
 
+      if (error || !data) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-red-500 py-4">Gagal mengambil data</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data
+        .map(item => {
+          const waktuObj = new Date(item.waktu);
+          const waktuFormatted = waktuObj.toLocaleString("id-ID", {
+            timeZone: "Asia/Jakarta",
+            day: "2-digit", month: "2-digit", year: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit"
+          });
+          const detik = waktuObj.getSeconds().toString().padStart(2, '0');
+          return `
+            <tr>
+              <td class="border px-4 py-2">${item.kelembapan}</td>
+              <td class="border px-4 py-2">${waktuFormatted}</td>
+              <td class="border px-4 py-2 text-center">${detik}</td>
+            </tr>`;
+        })
+        .join("");
+    }
 function downloadCSVSensor(data) {
       if (!data || data.length === 0) {
         alert("Data kosong.");
