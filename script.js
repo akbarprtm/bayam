@@ -109,8 +109,3 @@ const SUPABASE_URL = 'https://ctggbrmvubjggyxmmbse.supabase.co';
       fetchChartData();
       console.log('🔄 Auto-refresh 5 detik...');
     }, 5000);
-
-    // Inisialisasi awal
-    initChart();
-    fetchLatestData();
-    fetchChartData();
