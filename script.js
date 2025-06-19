@@ -12,7 +12,7 @@ function initChart() {
   kelembapanChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: [], // waktu
+      labels: [],
       datasets: [{
         label: 'Kelembapan (%)',
         data: [],
@@ -37,7 +37,7 @@ function initChart() {
             callback: function(value) {
               const label = this.getLabelForValue(value);
               const [datePart, timePart] = label.split(' ');
-              return [datePart, timePart]; // tampilkan dalam 2 baris
+              return [datePart, timePart];
             }
           }
         },
@@ -50,7 +50,7 @@ function initChart() {
   });
 }
 
-// Ambil data terakhir
+// Ambil data terakhir untuk ditampilkan di card
 async function fetchLatestData() {
   const { data: kelembapan, error: err1 } = await supabase
     .from('sensor_data')
@@ -70,13 +70,9 @@ async function fetchLatestData() {
 
   if (penyiraman && penyiraman.length > 0) {
     const waktu = new Date(penyiraman[0].waktu).toLocaleString('id-ID', {
-      day: '2-digit',
-      month: '2-digit',
-      year: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-      timeZone: 'Asia/Jakarta'
+      day: '2-digit', month: '2-digit', year: '2-digit',
+      hour: '2-digit', minute: '2-digit',
+      hour12: false, timeZone: 'Asia/Jakarta'
     });
     document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
   }
@@ -91,22 +87,18 @@ async function fetchChartData() {
     .limit(7);
 
   if (data) {
-    const reversed = data.reverse(); // urut waktu naik
+    const reversed = data.reverse(); // supaya urut waktu naik
     kelembapanChart.data.labels = reversed.map(item => {
       const waktu = new Date(item.waktu);
       const tanggal = waktu.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit',
+        day: '2-digit', month: '2-digit', year: '2-digit',
         timeZone: 'Asia/Jakarta'
       });
       const jam = waktu.toLocaleTimeString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-        timeZone: 'Asia/Jakarta'
+        hour: '2-digit', minute: '2-digit',
+        hour12: false, timeZone: 'Asia/Jakarta'
       });
-      return `${tanggal} ${jam}`;
+      return `${tanggal} ${jam}`; // format: dd/mm/yy hh:mm
     });
 
     kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
@@ -114,34 +106,38 @@ async function fetchChartData() {
   }
 }
 
-/// Realtime listener untuk sensor_data (hanya INSERT)
-supabase
+// Inisialisasi realtime listener untuk sensor_data (INSERT)
+const channelSensor = supabase
   .channel('sensor_data_changes')
   .on('postgres_changes', {
     event: 'INSERT',
     schema: 'public',
     table: 'sensor_data'
   }, async (payload) => {
-    console.log('📡 Update data sensor masuk');
+    console.log('📡 Data sensor baru:', payload.new);
     await fetchLatestData();
     await fetchChartData();
   })
-  .subscribe();
+  .subscribe((status) => {
+    console.log('🟢 Status listener sensor_data:', status);
+  });
 
-// Realtime listener untuk penyiraman (hanya INSERT)
-supabase
+// Realtime listener untuk penyiraman (INSERT)
+const channelPenyiraman = supabase
   .channel('penyiraman_changes')
   .on('postgres_changes', {
     event: 'INSERT',
     schema: 'public',
     table: 'penyiraman'
   }, async (payload) => {
-    console.log('📡 Update data penyiraman masuk');
+    console.log('📡 Data penyiraman baru:', payload.new);
     await fetchLatestData();
   })
-  .subscribe();
+  .subscribe((status) => {
+    console.log('🟢 Status listener penyiraman:', status);
+  });
 
-
+// Panggil awal
 initChart();
 fetchLatestData();
 fetchChartData();
