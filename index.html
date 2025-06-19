@@ -33,11 +33,15 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-md p-6 mt-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-700">Data Kelembapan Terbaru</h2>
-        <button onclick="unduhCSV()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
-          Unduh CSV
-        </button>
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+        <h2 class="text-lg font-semibold text-gray-700 text-center md:text-left">Data Kelembapan Terbaru</h2>
+        <div class="flex items-center gap-2">
+          <label for="jumlahData" class="text-sm text-gray-700">Jumlah data:</label>
+          <input id="jumlahData" type="number" min="1" value="7" class="w-20 px-2 py-1 border rounded text-center text-sm" />
+          <button onclick="unduhCSV()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
+            Unduh CSV
+          </button>
+        </div>
       </div>
       <div class="overflow-x-auto">
         <table class="min-w-full table-auto text-sm text-center text-gray-700">
@@ -46,11 +50,12 @@
               <th class="px-4 py-2">Tanggal</th>
               <th class="px-4 py-2">Jam</th>
               <th class="px-4 py-2">Kelembapan (%)</th>
-              <th class="px-4 py-2">Waktu Penyiraman (detik)</th>
+              <th class="px-4 py-2">Durasi Penyiraman (detik)</th>
+              <th class="px-4 py-2">Status</th>
             </tr>
           </thead>
           <tbody id="tabelKelembapan">
-            <!-- Data diisi oleh JS -->
+            <!-- Data dari JS -->
           </tbody>
         </table>
       </div>
