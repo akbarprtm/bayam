@@ -106,6 +106,46 @@ async function fetchChartData() {
   }
 }
 
+function downloadCSVSensor(data) {
+      if (!data || data.length === 0) {
+        alert("Data kosong.");
+        return;
+      }
+
+      const header = "Kelembapan,Waktu,Detik";
+      const rows = data.map(row => {
+        const waktu = new Date(row.waktu);
+        const waktuStr = waktu.toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
+        const detik = waktu.getSeconds();
+        return `${row.kelembapan},${waktuStr},${detik}`;
+      });
+
+      const csv = [header, ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `sensor_data_${new Date().toISOString()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    btnUnduh.addEventListener("click", async () => {
+      const limit = parseInt(jumlahSelect.value);
+      const { data, error } = await supabase
+        .from("sensor_data")
+        .select("*")
+        .order("waktu", { ascending: false })
+        .limit(limit);
+      if (error) return alert("Gagal mengambil data");
+      downloadCSVSensor(data);
+    });
+
+    jumlahSelect.addEventListener("change", () => {
+      fetchSensorTable(parseInt(jumlahSelect.value));
+    });
+
 
 // Auto-refresh setiap 5 detik
     setInterval(() => {
