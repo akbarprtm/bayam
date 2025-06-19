@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
   const supabaseUrl = 'https://ctggbrmvubjggyxmmbse.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyNTE4NDcsImV4cCI6MjA2MzgyNzg0N30.6la5T8_8wrme55wKM7_r7kA6SO90-ht8JlP8aE3C6UA';
-  const table = "sensor_data"; // ganti langsung jadi "sensor_data"
-  
+  const table = "sensor_data";
+
   let kelembapan;
 
   if (req.method === 'GET') {
@@ -17,6 +17,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Parameter kelembapan harus berupa angka' });
   }
 
+  // Hitung waktu dalam zona WIB
+  const waktuWIB = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString();
+
   try {
     const response = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
       method: 'POST',
@@ -27,8 +30,8 @@ export default async function handler(req, res) {
         'Prefer': 'return=representation'
       },
       body: JSON.stringify({
-        kelembapan: parseInt(kelembapan), // ubah kolom jadi "kelembapan"
-        waktu: new Date().toISOString()
+        kelembapan: parseInt(kelembapan),
+        waktu: waktuWIB
       })
     });
 
@@ -38,7 +41,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Gagal menyimpan ke Supabase', detail: data });
     }
 
-    return res.status(200).json({ message: '✅ Kelembapan berhasil disimpan', data });
+    return res.status(200).json({ message: '✅ Kelembapan berhasil disimpan (WIB)', data });
 
   } catch (err) {
     return res.status(500).json({ error: 'Terjadi kesalahan server', detail: err.message });
