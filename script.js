@@ -78,33 +78,6 @@ async function fetchLatestData() {
   }
 }
 
-// Ambil 7 data terakhir untuk chart
-async function fetchChartData() {
-  const { data, error } = await supabase
-    .from('sensor_data')
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(7);
-
-  if (data) {
-    const reversed = data.reverse(); // supaya urut waktu naik
-    kelembapanChart.data.labels = reversed.map(item => {
-      const waktu = new Date(item.waktu);
-      const tanggal = waktu.toLocaleDateString('id-ID', {
-        day: '2-digit', month: '2-digit', year: '2-digit',
-        timeZone: 'Asia/Jakarta'
-      });
-      const jam = waktu.toLocaleTimeString('id-ID', {
-        hour: '2-digit', minute: '2-digit',
-        hour12: false, timeZone: 'Asia/Jakarta'
-      });
-      return `${tanggal} ${jam}`; // format: dd/mm/yy hh:mm
-    });
-
-    kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
-    kelembapanChart.update();
-  }
-}
 async function fetchSensorTable(limit = 10) {
       const { data, error } = await supabase
         .from("sensor_data")
