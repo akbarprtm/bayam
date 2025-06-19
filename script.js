@@ -106,55 +106,6 @@ async function fetchChartData() {
   }
 }
 
-// Fungsi untuk convert data ke CSV dan trigger download
-    function downloadCSV(data) {
-      if (!data || data.length === 0) {
-        alert('Data kosong, tidak bisa diunduh.');
-        return;
-      }
-
-      const csvRows = [];
-      // Header CSV
-      csvRows.push('Kelembapan (%),Waktu (WIB)');
-
-      data.forEach(item => {
-        const waktu = new Date(item.waktu);
-        const waktuStr = waktu.toLocaleString('id-ID', {
-          timeZone: 'Asia/Jakarta',
-          year: 'numeric', month: '2-digit', day: '2-digit',
-          hour: '2-digit', minute: '2-digit', second: '2-digit',
-          hour12: false
-        });
-        csvRows.push(`${item.kelembapan},${waktuStr}`);
-      });
-
-      const csvString = csvRows.join('\n');
-      const blob = new Blob([csvString], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `data_kelembapan_${new Date().toISOString()}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    async function handleDownload() {
-      const limit = parseInt(document.getElementById('jumlahData').value);
-      const { data, error } = await supabase
-        .from('sensor_data')
-        .select('*')
-        .order('waktu', { ascending: false })
-        .limit(limit);
-
-      if (error) {
-        alert('Gagal mengambil data untuk diunduh: ' + error.message);
-        return;
-      }
-      downloadCSV(data);
-    }
-
-// Event handler tombol unduh
-    document.getElementById('btnDownload').addEventListener('click', handleDownload);
 
 // Auto-refresh setiap 5 detik
     setInterval(() => {
