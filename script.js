@@ -34,7 +34,7 @@ function initChart() {
           ticks: {
             color: '#4B5563',
             maxRotation: 0,
-            callback: function(value, index, ticks) {
+            callback: function(value) {
               const label = this.getLabelForValue(value);
               const [datePart, timePart] = label.split(' ');
               return [datePart, timePart]; // tampilkan dalam 2 baris
@@ -69,8 +69,16 @@ async function fetchLatestData() {
   }
 
   if (penyiraman && penyiraman.length > 0) {
-    const waktu = new Date(penyiraman[0].waktu).toLocaleString('id-ID');
-    document.getElementById('waktuPenyiraman').textContent = waktu;
+    const waktu = new Date(penyiraman[0].waktu).toLocaleString('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Jakarta'
+    });
+    document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
   }
 }
 
@@ -86,9 +94,19 @@ async function fetchChartData() {
     const reversed = data.reverse(); // urut waktu naik
     kelembapanChart.data.labels = reversed.map(item => {
       const waktu = new Date(item.waktu);
-      const tanggal = waktu.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
-      const jam = waktu.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      return `${tanggal} ${jam}`; // akan di-split jadi 2 baris di label
+      const tanggal = waktu.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        timeZone: 'Asia/Jakarta'
+      });
+      const jam = waktu.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Jakarta'
+      });
+      return `${tanggal} ${jam}`;
     });
 
     kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
