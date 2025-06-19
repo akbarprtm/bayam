@@ -106,36 +106,34 @@ async function fetchChartData() {
   }
 }
 
-// Inisialisasi realtime listener untuk sensor_data (INSERT)
-const channelSensor = supabase
-  .channel('sensor_data_changes')
-  .on('postgres_changes', {
-    event: 'INSERT',
-    schema: 'public',
-    table: 'sensor_data'
-  }, async (payload) => {
-    console.log('📡 Data sensor baru:', payload.new);
-    await fetchLatestData();
-    await fetchChartData();
-  })
-  .subscribe((status) => {
-    console.log('🟢 Status listener sensor_data:', status);
-  });
+// Realtime sensor_data
+    supabase.channel('sensor_data_changes')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'sensor_data'
+      }, async (payload) => {
+        console.log('📡 Sensor data baru:', payload.new);
+        await fetchLatestData();
+        await fetchChartData();
+      })
+      .subscribe((status) => {
+        console.log('🟢 Listener sensor_data status:', status);
+      });
 
-// Realtime listener untuk penyiraman (INSERT)
-const channelPenyiraman = supabase
-  .channel('penyiraman_changes')
-  .on('postgres_changes', {
-    event: 'INSERT',
-    schema: 'public',
-    table: 'penyiraman'
-  }, async (payload) => {
-    console.log('📡 Data penyiraman baru:', payload.new);
-    await fetchLatestData();
-  })
-  .subscribe((status) => {
-    console.log('🟢 Status listener penyiraman:', status);
-  });
+    // Realtime penyiraman
+    supabase.channel('penyiraman_changes')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'penyiraman'
+      }, async (payload) => {
+        console.log('📡 Penyiraman baru:', payload.new);
+        await fetchLatestData();
+      })
+      .subscribe((status) => {
+        console.log('🟢 Listener penyiraman status:', status);
+      });
 
 // Panggil awal
 initChart();
