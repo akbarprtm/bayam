@@ -98,28 +98,31 @@ function updateTabelKelembapan(data) {
       hour12: false, timeZone: 'Asia/Jakarta'
     });
 
-    const durasiPenyiraman = item.durasi_penyiraman || 0; // pastikan kolom ini ada di DB
+    const durasi = item.durasi_penyiraman || 0;
+    const status = item.manual === true ? 'Manual' : 'Otomatis';
 
     const row = `
       <tr class="border-t">
         <td class="px-4 py-2">${tanggal}</td>
         <td class="px-4 py-2">${jam}</td>
         <td class="px-4 py-2">${item.kelembapan}%</td>
-        <td class="px-4 py-2">${durasiPenyiraman}</td>
+        <td class="px-4 py-2">${durasi}</td>
+        <td class="px-4 py-2">${status}</td>
       </tr>
     `;
     tabel.innerHTML += row;
   });
 }
 
+
 function unduhCSV() {
-  const rows = [['Tanggal', 'Jam', 'Kelembapan (%)', 'Waktu Penyiraman (detik)']];
+  const rows = [['Tanggal', 'Jam', 'Kelembapan (%)', 'Durasi (detik)', 'Status']];
   const tabel = document.querySelectorAll('#tabelKelembapan tr');
-  
+
   tabel.forEach(row => {
     const cells = row.querySelectorAll('td');
     const rowData = Array.from(cells).map(cell => cell.textContent);
-    rows.push(rowData);
+    if (rowData.length) rows.push(rowData);
   });
 
   const csvContent = rows.map(e => e.join(',')).join('\n');
@@ -137,11 +140,13 @@ function unduhCSV() {
 
 // Ambil 7 data terakhir untuk chart dan tabel
 async function fetchChartData() {
+  const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
+
   const { data } = await supabase
     .from('sensor_data')
     .select('*')
     .order('waktu', { ascending: false })
-    .limit(7);
+    .limit(jumlah);
 
   if (data) {
     const reversed = data.reverse();
@@ -165,6 +170,7 @@ async function fetchChartData() {
     updateTabelKelembapan(reversed);
   }
 }
+
 
 // Inisialisasi
 initChart();
