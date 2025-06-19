@@ -110,3 +110,9 @@ async function fetchChartData() {
 initChart();
 fetchLatestData();
 fetchChartData();
+
+// Fungsi refresh data tiap 5 detik
+setInterval(async () => {
+  await fetchLatestData();
+  await fetchChartData();
+}, 5000);
