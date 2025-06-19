@@ -24,6 +24,10 @@ function initChart() {
     },
     options: {
       responsive: true,
+      animation: {
+        duration: 800,
+        easing: 'easeInOutQuart'
+      },
       plugins: {
         legend: {
           labels: { color: '#4B5563' }
@@ -52,13 +56,13 @@ function initChart() {
 
 // Ambil data terakhir untuk ditampilkan di card
 async function fetchLatestData() {
-  const { data: kelembapan, error: err1 } = await supabase
+  const { data: kelembapan } = await supabase
     .from('sensor_data')
     .select('*')
     .order('waktu', { ascending: false })
     .limit(1);
 
-  const { data: penyiraman, error: err2 } = await supabase
+  const { data: penyiraman } = await supabase
     .from('penyiraman')
     .select('*')
     .order('waktu', { ascending: false })
@@ -78,38 +82,10 @@ async function fetchLatestData() {
   }
 }
 
-// Ambil 7 data terakhir untuk chart
-async function fetchChartData() {
-  const { data, error } = await supabase
-    .from('sensor_data')
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(7);
-
-  if (data) {
-    const reversed = data.reverse(); // supaya urut waktu naik
-    kelembapanChart.data.labels = reversed.map(item => {
-      const waktu = new Date(item.waktu);
-      const tanggal = waktu.toLocaleDateString('id-ID', {
-        day: '2-digit', month: '2-digit', year: '2-digit',
-        timeZone: 'Asia/Jakarta'
-      });
-      const jam = waktu.toLocaleTimeString('id-ID', {
-        hour: '2-digit', minute: '2-digit',
-        hour12: false, timeZone: 'Asia/Jakarta'
-      });
-      return `${tanggal} ${jam}`; // format: dd/mm/yy hh:mm
-    });
-
-    kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
-    kelembapanChart.update();
-  }
-}
-
-// Isi tabel dengan data kelembapan
+// Update tabel data kelembapan
 function updateTabelKelembapan(data) {
   const tabel = document.getElementById('tabelKelembapan');
-  tabel.innerHTML = ''; // kosongkan isi tabel
+  tabel.innerHTML = '';
 
   data.forEach(item => {
     const waktu = new Date(item.waktu);
@@ -131,14 +107,45 @@ function updateTabelKelembapan(data) {
     `;
     tabel.innerHTML += row;
   });
-};
+}
 
-// Panggil awal
+// Ambil 7 data terakhir untuk chart dan tabel
+async function fetchChartData() {
+  const { data } = await supabase
+    .from('sensor_data')
+    .select('*')
+    .order('waktu', { ascending: false })
+    .limit(7);
+
+  if (data) {
+    const reversed = data.reverse();
+
+    kelembapanChart.data.labels = reversed.map(item => {
+      const waktu = new Date(item.waktu);
+      const tanggal = waktu.toLocaleDateString('id-ID', {
+        day: '2-digit', month: '2-digit', year: '2-digit',
+        timeZone: 'Asia/Jakarta'
+      });
+      const jam = waktu.toLocaleTimeString('id-ID', {
+        hour: '2-digit', minute: '2-digit',
+        hour12: false, timeZone: 'Asia/Jakarta'
+      });
+      return `${tanggal} ${jam}`;
+    });
+
+    kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
+    kelembapanChart.update();
+
+    updateTabelKelembapan(reversed);
+  }
+}
+
+// Inisialisasi
 initChart();
 fetchLatestData();
 fetchChartData();
 
-// Fungsi refresh data tiap 5 detik
+// Refresh data setiap 5 detik
 setInterval(async () => {
   await fetchLatestData();
   await fetchChartData();
