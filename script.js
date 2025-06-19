@@ -94,20 +94,46 @@ function updateTabelKelembapan(data) {
       timeZone: 'Asia/Jakarta'
     });
     const jam = waktu.toLocaleTimeString('id-ID', {
-      hour: '2-digit', minute: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
       hour12: false, timeZone: 'Asia/Jakarta'
     });
+
+    const durasiPenyiraman = item.durasi_penyiraman || 0; // pastikan kolom ini ada di DB
 
     const row = `
       <tr class="border-t">
         <td class="px-4 py-2">${tanggal}</td>
         <td class="px-4 py-2">${jam}</td>
         <td class="px-4 py-2">${item.kelembapan}%</td>
+        <td class="px-4 py-2">${durasiPenyiraman}</td>
       </tr>
     `;
     tabel.innerHTML += row;
   });
 }
+
+function unduhCSV() {
+  const rows = [['Tanggal', 'Jam', 'Kelembapan (%)', 'Waktu Penyiraman (detik)']];
+  const tabel = document.querySelectorAll('#tabelKelembapan tr');
+  
+  tabel.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    const rowData = Array.from(cells).map(cell => cell.textContent);
+    rows.push(rowData);
+  });
+
+  const csvContent = rows.map(e => e.join(',')).join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'data_kelembapan.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+
 
 // Ambil 7 data terakhir untuk chart dan tabel
 async function fetchChartData() {
