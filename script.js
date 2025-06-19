@@ -114,22 +114,33 @@ async function fetchChartData() {
   }
 }
 
-// Realtime listener (kelembapan)
+/// Realtime listener untuk sensor_data (hanya INSERT)
 supabase
-  .channel('public:kelembapan')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'sensor_data' }, payload => {
-    fetchLatestData();
-    fetchChartData();
+  .channel('sensor_data_changes')
+  .on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'sensor_data'
+  }, async (payload) => {
+    console.log('📡 Update data sensor masuk');
+    await fetchLatestData();
+    await fetchChartData();
   })
   .subscribe();
 
-// Realtime listener (penyiraman)
+// Realtime listener untuk penyiraman (hanya INSERT)
 supabase
-  .channel('public:penyiraman')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'penyiraman' }, payload => {
-    fetchLatestData();
+  .channel('penyiraman_changes')
+  .on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'penyiraman'
+  }, async (payload) => {
+    console.log('📡 Update data penyiraman masuk');
+    await fetchLatestData();
   })
   .subscribe();
+
 
 initChart();
 fetchLatestData();
