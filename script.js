@@ -104,6 +104,33 @@ async function fetchChartData() {
     kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
     kelembapanChart.update();
   }
+}
+
+// Isi tabel dengan data kelembapan
+function updateTabelKelembapan(data) {
+  const tabel = document.getElementById('tabelKelembapan');
+  tabel.innerHTML = ''; // kosongkan isi tabel
+
+  data.forEach(item => {
+    const waktu = new Date(item.waktu);
+    const tanggal = waktu.toLocaleDateString('id-ID', {
+      day: '2-digit', month: '2-digit', year: '2-digit',
+      timeZone: 'Asia/Jakarta'
+    });
+    const jam = waktu.toLocaleTimeString('id-ID', {
+      hour: '2-digit', minute: '2-digit',
+      hour12: false, timeZone: 'Asia/Jakarta'
+    });
+
+    const row = `
+      <tr class="border-t">
+        <td class="px-4 py-2">${tanggal}</td>
+        <td class="px-4 py-2">${jam}</td>
+        <td class="px-4 py-2">${item.kelembapan}%</td>
+      </tr>
+    `;
+    tabel.innerHTML += row;
+  });
 };
 
 // Panggil awal
