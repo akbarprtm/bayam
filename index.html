@@ -32,36 +32,7 @@
       <canvas id="chartKelembapan" height="100"></canvas>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-gray-700">Tabel Data Sensor Kelembapan</h2>
-        <div class="flex items-center gap-3">
-          <select id="jumlahDataSensor" class="border px-2 py-1 rounded">
-            <option value="10">10 data terakhir</option>
-            <option value="25">25 data terakhir</option>
-            <option value="50">50 data terakhir</option>
-            <option value="100">100 data terakhir</option>
-          </select>
-          <button id="btnUnduhSensor" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-            Unduh CSV
-          </button>
-        </div>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse border border-gray-300">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="border px-4 py-2">Kelembapan (%)</th>
-              <th class="border px-4 py-2">Waktu (WIB)</th>
-              <th class="border px-4 py-2">Detik</th>
-            </tr>
-          </thead>
-          <tbody id="sensorTableBody">
-            <tr><td colspan="3" class="text-center text-gray-500 py-4">Memuat data...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    
   </div>
 
   <script type="module" src="script.js"></script>
