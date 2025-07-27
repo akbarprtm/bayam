@@ -7,7 +7,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Fungsi konversi UTC ke WIB
 function konversiWaktuUTCkeWIB(utcString) {
   const waktuUTC = new Date(utcString);
-  const waktuWIB = new Date(waktuUTC.getTime() + (7 * 60 * 60 * 1000)); // Tambah 7 jam
+  const waktuWIB = new Date(waktuUTC.getTime() + (17 * 60 * 60 * 1000)); // Tambah 7 jam
 
   const tanggal = waktuWIB.toLocaleDateString('id-ID', {
     day: '2-digit', month: '2-digit', year: '2-digit'
@@ -90,7 +90,7 @@ async function fetchLatestData() {
   const { data, error } = await supabase
     .from('data')
     .select('*')
-    .order('waktu', { ascending: false })
+    .order('waktu', { ascending: true })
     .limit(10);
 
   if (error) {
