@@ -55,7 +55,7 @@ function initChart() {
 
 function konversiWaktuUTCkeWIB(utcString) {
   const waktuUTC = new Date(utcString);
-  const waktuWIB = new Date(waktuUTC.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+  const waktuWIB = new Date(waktuUTC.getTime() + (7 * 60 * 60 * 1000)); // Tambah 7 jam
 
   const tanggal = waktuWIB.toLocaleDateString('id-ID', {
     day: '2-digit', month: '2-digit', year: '2-digit'
@@ -69,6 +69,7 @@ function konversiWaktuUTCkeWIB(utcString) {
   return { tanggal, jam };
 }
 
+
 async function fetchLatestData() {
   try {
     const { data } = await supabase
@@ -81,7 +82,7 @@ async function fetchLatestData() {
       document.getElementById('kelembapan').textContent = data[0].kelembapan + '%';
 
       const waktuUTC = new Date(data[0].waktu);
-      const waktuWIB = new Date(waktuUTC.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+      const waktuWIB = new Date(waktuUTC.getTime() + (7 * 60 * 60 * 1000));
 
       const waktu = waktuWIB.toLocaleString('id-ID', {
         day: '2-digit',
@@ -99,6 +100,7 @@ async function fetchLatestData() {
     console.error('Gagal fetch data terbaru:', error);
   }
 }
+
 
 function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
