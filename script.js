@@ -157,16 +157,8 @@ async function fetchChartData() {
   }
 }
 
-function perbaruiSemua() {
-  initChart();
-  fetchLatestData();   // ambil data terbaru dan update tampilan utama
-  fetchChartData();    // update grafik
-  updateTabelKelembapan(data); // update tabel jika `data` sudah tersedia
-}
-
-// Panggil saat halaman pertama kali dibuka
-perbaruiSemua();
-
-// Jalankan ulang tiap 5 detik
-setInterval(perbaruiSemua, 5000);
+// AUTO-REFRESH TIAP 5 DETIK
+setInterval(() => {
+  fetchLatestData();
+}, 5000);
 
