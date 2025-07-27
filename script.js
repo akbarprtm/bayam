@@ -55,7 +55,7 @@ function initChart() {
 
 function konversiWaktuUTCkeWIB(utcString) {
   const waktuUTC = new Date(utcString);
-  const waktuWIB = new Date(waktuUTC.getTime() + (7 * 60 * 60 * 1000)); // Tambah 7 jam
+  const waktuWIB = new Date(waktuUTC.getTime() + (17 * 60 * 60 * 1000)); // Tambah 17 jam
 
   const tanggal = waktuWIB.toLocaleDateString('id-ID', {
     day: '2-digit', month: '2-digit', year: '2-digit'
@@ -68,7 +68,6 @@ function konversiWaktuUTCkeWIB(utcString) {
 
   return { tanggal, jam };
 }
-
 
 async function fetchLatestData() {
   try {
