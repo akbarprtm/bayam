@@ -123,7 +123,7 @@ async function fetchChartData() {
       const reversed = data.reverse();
 
       kelembapanChart.data.labels = reversed.map(item => {
-        const waktu = new Date(item.waktu + 'Z');
+        const waktu = new Date(item.waktu);
         const tanggal = waktu.toLocaleDateString('id-ID', {
           day: '2-digit',
           month: '2-digit',
