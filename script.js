@@ -5,22 +5,30 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Fungsi konversi UTC ke WIB
-// Fungsi konversi UTC ke WIB
 function konversiWaktuUTCkeWIB(utcString) {
   const waktuUTC = new Date(utcString);
-  const waktuWIB = new Date(waktuUTC.getTime() + (7 * 60 * 60 * 1000)); // Tambah 7 jam (WIB)
 
-  const tanggal = waktuWIB.toLocaleDateString('id-ID', {
-    day: '2-digit', month: '2-digit', year: '2-digit'
+  const formatterTanggal = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit'
   });
 
-  const jam = waktuWIB.toLocaleTimeString('id-ID', {
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  const formatterJam = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
     hour12: false
   });
 
+  const tanggal = formatterTanggal.format(waktuUTC);
+  const jam = formatterJam.format(waktuUTC);
+
   return { tanggal, jam };
 }
+
 
 // Update isi tabel
 function updateTabelKelembapan(data) {
