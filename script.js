@@ -154,6 +154,7 @@ async function fetchChartData() {
 }
 
 setInterval(() => {
+  initChart();
   fetchLatestData();
   fetchChartData();
 }, 5000);
