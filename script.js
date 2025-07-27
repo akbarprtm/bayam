@@ -100,7 +100,7 @@ function updateTabelKelembapan(data) {
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
 
-    tabel.innerHTML += `
+    tbody.innerHTML += `
       <tr class="border-t">
         <td class="px-4 py-2 text-center">${index + 1}</td>
         <td class="px-4 py-2">${tanggal}</td>
