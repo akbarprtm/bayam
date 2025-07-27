@@ -1,4 +1,3 @@
-<script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(
   'https://ctggbrmvubjggyxmmbse.supabase.co',
