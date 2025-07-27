@@ -101,28 +101,30 @@ async function fetchLatestData() {
 }
 
 function updateTabelKelembapan(data) {
-  const tbody = document.querySelector("tabel-kelembapan tbody");
-  tbody.innerHTML = "";
+  const tbody = document.getElementById('tabelKelembapan');
+  tbody.innerHTML = '';
 
-  const reversedData = [...data].reverse();
+  data.slice().reverse().forEach((item, index) => {
+    const waktuWIB = formatWaktuKeWIB(item.waktu).split(', ');
+    const tanggal = waktuWIB[0];
+    const jam = waktuWIB[1];
 
-  reversedData.forEach((item, index) => {
-    const { tanggal, jam } = konversiWaktuUTCkeWIB(item.waktu);
-    const tr = document.createElement("tr");
+    const durasi = item.durasi_detik || 0;
+    const metode = item.metode === 'manual' ? 'Manual' :
+                   item.metode === 'otomatis' ? 'Otomatis' : '-';
 
-    tr.innerHTML = `
-      <td class="border px-4 py-2 text-center">${index + 1}</td>
-      <td class="border px-4 py-2 text-center">${item.kelembapan}%</td>
-      <td class="border px-4 py-2 text-center">${item.metode}</td>
-      <td class="border px-4 py-2 text-center">${item.durasi} detik</td>
-      <td class="border px-4 py-2 text-center">${tanggal}</td>
-      <td class="border px-4 py-2 text-center">${jam}</td>
+    tbody.innerHTML += `
+      <tr class="border-t">
+        <td class="px-4 py-2 text-center">${index + 1}</td>
+        <td class="px-4 py-2">${tanggal}</td>
+        <td class="px-4 py-2">${jam}</td>
+        <td class="px-4 py-2">${item.kelembapan}%</td>
+        <td class="px-4 py-2">${durasi}</td>
+        <td class="px-4 py-2">${metode}</td>
+      </tr>
     `;
-
-    tbody.appendChild(tr);
   });
 }
-
 async function fetchChartData() {
   try {
     const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
@@ -151,10 +153,8 @@ async function fetchChartData() {
   }
 }
 
-initChart();
-fetchLatestData();
-fetchChartData();
 setInterval(() => {
+  initChart();
   fetchLatestData();
   fetchChartData();
 }, 5000);
