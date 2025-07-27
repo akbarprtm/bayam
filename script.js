@@ -124,22 +124,33 @@ function unduhCSV() {
   const rows = [['Tanggal', 'Jam', 'Kelembapan (%)', 'Durasi (detik)', 'Metode']];
   const tabel = document.querySelectorAll('#tabelKelembapan tr');
 
+  if (!tabel.length) {
+    alert("Tidak ada data untuk diunduh.");
+    return;
+  }
+
   tabel.forEach(row => {
     const cells = row.querySelectorAll('td');
-    const rowData = Array.from(cells).map(cell => cell.textContent);
-    if (rowData.length) rows.push(rowData);
+    if (cells.length) {
+      const rowData = Array.from(cells).map(cell => {
+        // Escape tanda koma
+        return `"${cell.textContent.replace(/"/g, '""')}"`;
+      });
+      rows.push(rowData);
+    }
   });
 
   const csvContent = rows.map(e => e.join(',')).join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
+
   const link = document.createElement('a');
-  link.href = url;
+  link.href = URL.createObjectURL(blob);
   link.download = 'data_kelembapan.csv';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
+
 
 // Ambil data untuk grafik dan tabel
 async function fetchChartData() {
