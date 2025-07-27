@@ -1,11 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+const { createClient } = require('@supabase/supabase-js')
 
+// Inisialisasi Supabase
 const supabase = createClient(
   'https://ctggbrmvubjggyxmmbse.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA' // Jangan pakai anon key untuk insert langsung dari server
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA' // Ganti dengan service_role key dari Supabase
 )
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   const { kelembapan, metode, durasi, waktu } = req.query
 
   if (!kelembapan || !metode || !durasi || !waktu) {
@@ -15,7 +16,12 @@ export default async function handler(req, res) {
   const { data, error } = await supabase
     .from('data')
     .insert([
-      { kelembapan: parseInt(kelembapan), metode, durasi: parseInt(durasi), waktu }
+      {
+        kelembapan: parseInt(kelembapan),
+        metode,
+        durasi: parseInt(durasi),
+        waktu
+      }
     ])
     .select()
 
@@ -23,5 +29,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message })
   }
 
-  res.status(200).json({ message: 'Data berhasil disimpan', data })
+  return res.status(200).json({ message: 'Data berhasil disimpan', data })
 }
