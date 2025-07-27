@@ -156,10 +156,6 @@ async function fetchChartData() {
     console.error('Gagal fetch data chart:', error);
   }
 }
-// Panggil initChart() hanya sekali saat awal
-initChart();
-fetchLatestData();
-fetchChartData();
 
 setInterval(() => {
   initChart();
@@ -167,3 +163,4 @@ setInterval(() => {
   fetchChartData();
   updateTabelKelembapan(data);
 }, 5000);
+
