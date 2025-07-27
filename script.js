@@ -54,19 +54,27 @@ function initChart() {
 }
 
 function konversiWaktuUTCkeWIB(utcString) {
-  const waktuUTC = new Date(utcString);
-  const waktuWIB = new Date(waktuUTC.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
-
-  const tanggal = waktuWIB.toLocaleDateString('id-ID', {
-    day: '2-digit', month: '2-digit', year: '2-digit'
+  const formatterTanggal = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit'
   });
 
-  const jam = waktuWIB.toLocaleTimeString('id-ID', {
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  const formatterJam = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
     hour12: false
   });
 
-  return { tanggal, jam };
+  const date = new Date(utcString);
+
+  return {
+    tanggal: formatterTanggal.format(date),
+    jam: formatterJam.format(date)
+  };
 }
 
 async function fetchLatestData() {
@@ -80,20 +88,8 @@ async function fetchLatestData() {
     if (data?.length) {
       document.getElementById('kelembapan').textContent = data[0].kelembapan + '%';
 
-      const waktuUTC = new Date(data[0].waktu);
-      const waktuWIB = new Date(waktuUTC.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
-
-      const waktu = waktuWIB.toLocaleString('id-ID', {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      });
-
-      document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
+      const { tanggal, jam } = konversiWaktuUTCkeWIB(data[0].waktu);
+      document.getElementById('waktuPenyiraman').textContent = `${tanggal} ${jam} WIB`;
     }
   } catch (error) {
     console.error('Gagal fetch data terbaru:', error);
