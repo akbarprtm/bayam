@@ -58,7 +58,7 @@ async function fetchLatestData() {
     const { data } = await supabase
       .from('data')
       .select('*')
-      .order('waktu', { ascending: true })
+      .order('waktu', { ascending: false })
       .limit(1);
 
     if (data?.length) {
@@ -88,7 +88,7 @@ function updateTabelKelembapan(data) {
   const reversedData = [...data].reverse();
 
   reversedData.forEach((item, index) => {
-    const waktu = new Date(item.waktu + 'Z');
+    const waktu = new Date(item.waktu);
     const tanggal = waktu.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'Asia/Jakarta' });
     const jam = waktu.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' });
 
