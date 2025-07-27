@@ -54,7 +54,7 @@ function updateTabelKelembapan(data) {
         <td class="px-4 py-2">${tanggal}</td>
         <td class="px-4 py-2">${jam}</td>
         <td class="px-4 py-2">${item.kelembapan}%</td>
-        <td class="px-4 py-2">${item.durasi_detik || 0}</td>
+        <td class="px-4 py-2">${item.durasi || 0}</td>
         <td class="px-4 py-2">${item.metode}</td>
       </tr>`;
   });
@@ -92,7 +92,6 @@ function unduhCSV() {
   document.body.removeChild(link);
 }
 
-initChart();
 setInterval(() => {
   fetchLatestData();
   fetchChartData();
