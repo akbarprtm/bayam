@@ -82,19 +82,15 @@ async function fetchLatestData() {
 }
 
 function updateTabelKelembapan(data) {
-  const tabel = document.getElementById('tabelKelembapan');
-  tabel.innerHTML = '';
+  const tbody = document.getElementById('tabelKelembapan');
+  tbody.innerHTML = '';
 
-  data.forEach((item, index) => {
+  const reversedData = [...data].reverse();
+
+  reversedData.forEach((item, index) => {
     const waktu = new Date(item.waktu);
-    const tanggal = waktu.toLocaleDateString('id-ID', {
-      day: '2-digit', month: '2-digit', year: '2-digit',
-      timeZone: 'Asia/Jakarta'
-    });
-    const jam = waktu.toLocaleTimeString('id-ID', {
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      hour12: false, timeZone: 'Asia/Jakarta'
-    });
+    const tanggal = waktu.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'Asia/Jakarta' });
+    const jam = waktu.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' });
 
     const durasi = item.durasi_detik || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
