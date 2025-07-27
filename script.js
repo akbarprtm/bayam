@@ -6,19 +6,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let kelembapanChart;
 
-function formatWaktuKeWIB(waktuUTC) {
-  const date = new Date(waktuUTC);
-  date.setHours(date.getHours() + 7); // konversi ke WIB
-
-  const tanggal = date.toLocaleDateString('id-ID');
-  const jam = date.toLocaleTimeString('id-ID', {
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hour12: false
-  });
-
-  return `${tanggal}, ${jam}`;
-}
-
 function initChart() {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
   kelembapanChart = new Chart(ctx, {
@@ -66,6 +53,21 @@ function initChart() {
   });
 }
 
+function konversiWaktuUTCkeWIB(utcString) {
+  const waktuUTC = new Date(utcString);
+  const waktuWIB = new Date(waktuUTC.getTime() + (7 * 60 * 60 * 1000)); // Tambah 7 jam
+
+  const tanggal = waktuWIB.toLocaleDateString('id-ID', {
+    day: '2-digit', month: '2-digit', year: '2-digit'
+  });
+
+  const jam = waktuWIB.toLocaleTimeString('id-ID', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false
+  });
+
+  return { tanggal, jam };
+}
 
 
 async function fetchLatestData() {
@@ -102,37 +104,29 @@ async function fetchLatestData() {
 
 function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
-  if (!tbody) return;
-
   tbody.innerHTML = '';
 
-  const reversedData = data.slice().reverse(); // agar data terbaru no. 1
-
-  reversedData.forEach((item, index) => {
+  data.slice().reverse().forEach((item, index) => {
     const waktuWIB = formatWaktuKeWIB(item.waktu).split(', ');
-    const tanggal = waktuWIB[0] || '-';
-    const jam = waktuWIB[1] || '-';
+    const tanggal = waktuWIB[0];
+    const jam = waktuWIB[1];
 
-    const durasi = item.durasi ?? item.durasi_detik ?? '-';
-    const metode = item.metode === 'manual' ? 'Manual'
-                  : item.metode === 'otomatis' ? 'Otomatis'
-                  : '-';
+    const durasi = item.durasi_detik || 0;
+    const metode = item.metode === 'manual' ? 'Manual' :
+                   item.metode === 'otomatis' ? 'Otomatis' : '-';
 
-    const row = `
+    tbody.innerHTML += `
       <tr class="border-t">
         <td class="px-4 py-2 text-center">${index + 1}</td>
         <td class="px-4 py-2">${tanggal}</td>
         <td class="px-4 py-2">${jam}</td>
-        <td class="px-4 py-2">${item.kelembapan ?? '-' }%</td>
+        <td class="px-4 py-2">${item.kelembapan}%</td>
         <td class="px-4 py-2">${durasi}</td>
         <td class="px-4 py-2">${metode}</td>
       </tr>
     `;
-
-    tbody.insertAdjacentHTML('beforeend', row);
   });
 }
-
 async function fetchChartData() {
   try {
     const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
