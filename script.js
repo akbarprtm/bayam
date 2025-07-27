@@ -160,8 +160,6 @@ async function fetchChartData() {
   }
 }
 
-// Inisialisasi awal
-initChart();
 // Auto refresh setiap 5 detik
 setInterval(() => {
   fetchLatestData();
