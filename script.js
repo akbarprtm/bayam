@@ -88,7 +88,7 @@ function updateTabelKelembapan(data) {
   const reversedData = [...data].reverse();
 
   reversedData.forEach((item, index) => {
-    const waktu = new Date(item.waktu.replace(' ', 'T') + 'Z');
+    const waktu = new Date(item.waktu + 'Z');
     const tanggal = waktu.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'Asia/Jakarta' });
     const jam = waktu.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' });
 
@@ -123,7 +123,7 @@ async function fetchChartData() {
       const reversed = data.reverse();
 
       kelembapanChart.data.labels = reversed.map(item => {
-        const waktu = new Date(item.waktu.replace(' ', 'T') + 'Z');
+        const waktu = new Date(item.waktu + 'Z');
         const tanggal = waktu.toLocaleDateString('id-ID', {
           day: '2-digit',
           month: '2-digit',
