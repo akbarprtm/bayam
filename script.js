@@ -85,7 +85,7 @@ async function fetchLatestData() {
 }
 
 function updateTabelKelembapan(data) {
-  const tbody = document.getElementById('tabelKelembapan');
+  const tbody = document.getElementById('tabel-kelembapan');
   tbody.innerHTML = '';
 
   const reversedData = [...data].reverse();
