@@ -1,12 +1,13 @@
-// Ganti dengan kredensial Supabase-mu
+// Ganti dengan kredensial Supabase kamu (hindari expose PUBLIC KEY di frontend production)
 const SUPABASE_URL = 'https://ctggbrmvubjggyxmmbse.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA';
+const SUPABASE_KEY = 'PUBLIC_ANON_KEY_HANYA_BOLEH_DIGUNAKAN_JIKA_TIDAK_SENSITIF';
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Buat chart
 let kelembapanChart;
+
+// Inisialisasi ChartJS
 function initChart() {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
   kelembapanChart = new Chart(ctx, {
@@ -38,7 +39,7 @@ function initChart() {
           ticks: {
             color: '#4B5563',
             maxRotation: 0,
-            callback: function(value) {
+            callback(value) {
               const label = this.getLabelForValue(value);
               const [datePart, timePart] = label.split(' ');
               return [datePart, timePart];
@@ -54,35 +55,39 @@ function initChart() {
   });
 }
 
-// Ambil data terakhir untuk ditampilkan di card
+// Ambil data terakhir
 async function fetchLatestData() {
-  const { data: kelembapan } = await supabase
-    .from('sensor_data')
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(1);
+  try {
+    const { data: kelembapan } = await supabase
+      .from('sensor_data')
+      .select('*')
+      .order('waktu', { ascending: false })
+      .limit(1);
 
-  const { data: penyiraman } = await supabase
-    .from('penyiraman')
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(1);
+    const { data: penyiraman } = await supabase
+      .from('penyiraman')
+      .select('*')
+      .order('waktu', { ascending: false })
+      .limit(1);
 
-  if (kelembapan && kelembapan.length > 0) {
-    document.getElementById('kelembapan').textContent = kelembapan[0].kelembapan + '%';
-  }
+    if (kelembapan?.length) {
+      document.getElementById('kelembapan').textContent = kelembapan[0].kelembapan + '%';
+    }
 
-  if (penyiraman && penyiraman.length > 0) {
-    const waktu = new Date(penyiraman[0].waktu).toLocaleString('id-ID', {
-      day: '2-digit', month: '2-digit', year: '2-digit',
-      hour: '2-digit', minute: '2-digit',
-      hour12: false, timeZone: 'Asia/Jakarta'
-    });
-    document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
+    if (penyiraman?.length) {
+      const waktu = new Date(penyiraman[0].waktu).toLocaleString('id-ID', {
+        day: '2-digit', month: '2-digit', year: '2-digit',
+        hour: '2-digit', minute: '2-digit',
+        hour12: false, timeZone: 'Asia/Jakarta'
+      });
+      document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
+    }
+  } catch (error) {
+    console.error('Gagal fetch data terbaru:', error);
   }
 }
 
-// Update tabel data kelembapan
+// Perbarui isi tabel
 function updateTabelKelembapan(data) {
   const tabel = document.getElementById('tabelKelembapan');
   tabel.innerHTML = '';
@@ -102,7 +107,7 @@ function updateTabelKelembapan(data) {
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
 
-    const row = `
+    tabel.innerHTML += `
       <tr class="border-t">
         <td class="px-4 py-2">${tanggal}</td>
         <td class="px-4 py-2">${jam}</td>
@@ -111,10 +116,10 @@ function updateTabelKelembapan(data) {
         <td class="px-4 py-2">${metode}</td>
       </tr>
     `;
-    tabel.innerHTML += row;
   });
 }
 
+// Fungsi unduh CSV
 function unduhCSV() {
   const rows = [['Tanggal', 'Jam', 'Kelembapan (%)', 'Durasi (detik)', 'Metode']];
   const tabel = document.querySelectorAll('#tabelKelembapan tr');
@@ -129,80 +134,77 @@ function unduhCSV() {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', 'data_kelembapan.csv');
+  link.href = url;
+  link.download = 'data_kelembapan.csv';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
 
-
-// Ambil 7 data terakhir untuk chart dan tabel
+// Ambil data untuk grafik dan tabel
 async function fetchChartData() {
-  const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
+  try {
+    const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
 
-  // Ambil data sensor
-  const { data: kelembapan } = await supabase
-    .from('sensor_data')
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(jumlah);
+    const { data: sensorData } = await supabase
+      .from('sensor_data')
+      .select('*')
+      .order('waktu', { ascending: false })
+      .limit(jumlah);
 
-  // Ambil data penyiraman
-  const { data: penyiramanData } = await supabase
-    .from('penyiraman')
-    .select('waktu, durasi_detik, metode')
-    .order('waktu', { ascending: false })
-    .limit(50);
+    const { data: penyiramanData } = await supabase
+      .from('penyiraman')
+      .select('waktu, durasi_detik, metode')
+      .order('waktu', { ascending: false })
+      .limit(50);
 
-  if (sensorData) {
-    const reversed = sensorData.reverse();
+    if (sensorData?.length) {
+      const reversed = sensorData.reverse();
 
-    // Update chart
-    kelembapanChart.data.labels = reversed.map(item => {
-      const waktu = new Date(item.waktu);
-      const tanggal = waktu.toLocaleDateString('id-ID', {
-        day: '2-digit', month: '2-digit', year: '2-digit',
-        timeZone: 'Asia/Jakarta'
-      });
-      const jam = waktu.toLocaleTimeString('id-ID', {
-        hour: '2-digit', minute: '2-digit',
-        hour12: false, timeZone: 'Asia/Jakarta'
-      });
-      return `${tanggal} ${jam}`;
-    });
-
-    kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
-    kelembapanChart.update();
-
-    // Gabungkan data penyiraman terdekat
-    const gabungan = reversed.map(sensor => {
-      const waktuSensor = new Date(sensor.waktu);
-      const penyiramanTerdekat = penyiramanData.find(p => {
-        const waktuPenyiraman = new Date(p.waktu);
-        return Math.abs(waktuSensor - waktuPenyiraman) <= 5 * 60 * 1000; // ±5 menit
+      kelembapanChart.data.labels = reversed.map(item => {
+        const waktu = new Date(item.waktu);
+        const tanggal = waktu.toLocaleDateString('id-ID', {
+          day: '2-digit', month: '2-digit', year: '2-digit',
+          timeZone: 'Asia/Jakarta'
+        });
+        const jam = waktu.toLocaleTimeString('id-ID', {
+          hour: '2-digit', minute: '2-digit',
+          hour12: false, timeZone: 'Asia/Jakarta'
+        });
+        return `${tanggal} ${jam}`;
       });
 
-      return {
-        ...sensor,
-        durasi_detik: penyiramanTerdekat?.durasi_detik ?? 0,
-        metode: penyiramanTerdekat?.metode ?? '-',
-      };
-    });
+      kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
+      kelembapanChart.update();
 
-    updateTabelKelembapan(gabungan);
+      const gabungan = reversed.map(sensor => {
+        const waktuSensor = new Date(sensor.waktu);
+        const penyiramanTerdekat = penyiramanData.find(p => {
+          const waktuPenyiraman = new Date(p.waktu);
+          return Math.abs(waktuSensor - waktuPenyiraman) <= 5 * 60 * 1000; // ±5 menit
+        });
+
+        return {
+          ...sensor,
+          durasi_detik: penyiramanTerdekat?.durasi_detik ?? 0,
+          metode: penyiramanTerdekat?.metode ?? '-',
+        };
+      });
+
+      updateTabelKelembapan(gabungan);
+    }
+  } catch (error) {
+    console.error('Gagal fetch data chart:', error);
   }
 }
 
-
-
-// Inisialisasi
+// Inisialisasi awal
 initChart();
 fetchLatestData();
 fetchChartData();
 
-// Refresh data setiap 5 detik
-setInterval(async () => {
-  await fetchLatestData();
-  await fetchChartData();
+// Auto refresh setiap 5 detik
+setInterval(() => {
+  fetchLatestData();
+  fetchChartData();
 }, 5000);
