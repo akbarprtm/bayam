@@ -157,8 +157,10 @@ async function fetchChartData() {
   }
 }
 
-// AUTO-REFRESH TIAP 5 DETIK
 setInterval(() => {
+  initChart();
   fetchLatestData();
+  fetchChartData();
+  updateTabelKelembapan(data);
 }, 5000);
 
