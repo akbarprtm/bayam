@@ -1,4 +1,3 @@
-// Ganti dengan kredensial Supabase kamu (hindari expose PUBLIC KEY di frontend production)
 const SUPABASE_URL = 'https://ctggbrmvubjggyxmmbse.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA';
 
@@ -7,7 +6,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let kelembapanChart;
 
-// Inisialisasi ChartJS
 function initChart() {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
   kelembapanChart = new Chart(ctx, {
@@ -55,7 +53,6 @@ function initChart() {
   });
 }
 
-// Ambil data terakhir
 async function fetchLatestData() {
   try {
     const { data } = await supabase
@@ -84,8 +81,6 @@ async function fetchLatestData() {
   }
 }
 
-
-// Perbarui isi tabel
 function updateTabelKelembapan(data) {
   const tabel = document.getElementById('tabelKelembapan');
   tabel.innerHTML = '';
@@ -105,7 +100,7 @@ function updateTabelKelembapan(data) {
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
 
-    tabel.innerHTML += 
+    tabel.innerHTML += `
       <tr class="border-t">
         <td class="px-4 py-2">${tanggal}</td>
         <td class="px-4 py-2">${jam}</td>
@@ -113,12 +108,10 @@ function updateTabelKelembapan(data) {
         <td class="px-4 py-2">${durasi}</td>
         <td class="px-4 py-2">${metode}</td>
       </tr>
-    ;
+    `;
   });
 }
 
-
-// Ambil data untuk grafik dan tabel
 async function fetchChartData() {
   try {
     const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
@@ -147,7 +140,7 @@ async function fetchChartData() {
           hour12: false,
           timeZone: 'Asia/Jakarta'
         });
-        return ${tanggal} ${jam};
+        return `${tanggal} ${jam}`;
       });
 
       kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
@@ -160,8 +153,7 @@ async function fetchChartData() {
   }
 }
 
-// Auto refresh setiap 5 detik
 setInterval(() => {
   fetchLatestData();
   fetchChartData();
-}, 5000); 
+}, 5000);
