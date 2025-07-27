@@ -85,25 +85,41 @@ async function fetchLatestData() {
 }
 
 function updateTabelKelembapan(data) {
-  const tbody = document.querySelector("#tabel-kelembapan tbody");
-  tbody.innerHTML = "";
+  const tbody = document.getElementById('tabelKelembapan');
+  tbody.innerHTML = '';
 
-  const reversedData = [...data].reverse(); // agar no 1 adalah data terbaru
-
+  const reversedData = [...data].reverse();
   reversedData.forEach((item, index) => {
-    const { tanggal, jam } = konversiWaktuUTCkeWIB(item.waktu);
-    const tr = document.createElement("tr");
+    const waktuUTC = new Date(item.waktu);
+    const waktuWIB = new Date(waktuUTC.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
 
-    tr.innerHTML = `
-      <td class="border px-4 py-2 text-center">${index + 1}</td>
-      <td class="border px-4 py-2 text-center">${item.kelembapan}%</td>
-      <td class="border px-4 py-2 text-center">${item.metode}</td>
-      <td class="border px-4 py-2 text-center">${item.durasi} detik</td>
-      <td class="border px-4 py-2 text-center">${tanggal}</td>
-      <td class="border px-4 py-2 text-center">${jam}</td>
+    const tanggal = waktuWIB.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit"
+    });
+
+    const jam = waktuWIB.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
+
+    const durasi = item.durasi_detik || 0;
+    const metode = item.metode === 'manual' ? 'Manual' :
+                   item.metode === 'otomatis' ? 'Otomatis' : '-';
+
+    tbody.innerHTML += `
+      <tr class="border-t">
+        <td class="px-4 py-2 text-center">${index + 1}</td>
+        <td class="px-4 py-2">${tanggal}</td>
+        <td class="px-4 py-2">${jam}</td>
+        <td class="px-4 py-2">${item.kelembapan}%</td>
+        <td class="px-4 py-2">${durasi}</td>
+        <td class="px-4 py-2">${metode}</td>
+      </tr>
     `;
-
-    tbody.appendChild(tr);
   });
 }
 
