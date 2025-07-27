@@ -53,35 +53,35 @@ function initChart() {
   });
 }
 
-async function ambilData() {
+async function fetchLatestData() {
   try {
-    const res = await fetch("/api/data"); // ganti endpoint jika perlu
-    const data = await res.json();
-    updateTabelKelembapan(data);
-    tampilkanKelembapanSaatIni(data);
-  } catch (err) {
-    console.error("❌ Gagal mengambil data:", err);
+    const { data } = await supabase
+      .from('data')
+      .select('*')
+      .order('waktu', { ascending: false })
+      .limit(1);
+
+    if (data?.length) {
+      document.getElementById('kelembapan').textContent = data[0].kelembapan + '%';
+
+      const waktuUTC = new Date(data[0].waktu);
+      const waktuWIB = new Date(waktuUTC.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+
+      const waktu = waktuWIB.toLocaleString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+
+      document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
+    }
+  } catch (error) {
+    console.error('Gagal fetch data terbaru:', error);
   }
-}
-
-function konversiWaktuUTCkeWIB(waktuUTCString) {
-  const waktuUTC = new Date(waktuUTCString);
-  const waktuWIB = new Date(waktuUTC.getTime() + 7 * 60 * 60 * 1000); // tambah 7 jam
-
-  const tanggal = waktuWIB.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit"
-  });
-
-  const jam = waktuWIB.toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false
-  });
-
-  return { tanggal, jam };
 }
 
 function updateTabelKelembapan(data) {
@@ -107,14 +107,44 @@ function updateTabelKelembapan(data) {
   });
 }
 
-function tampilkanKelembapanSaatIni(data) {
-  const kelembapanElem = document.getElementById("kelembapan");
-  if (!kelembapanElem || data.length === 0) return;
+async function fetchChartData() {
+  try {
+    const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
 
-  const dataTerbaru = data[data.length - 1];
-  kelembapanElem.textContent = `${dataTerbaru.kelembapan}%`;
+    const { data } = await supabase
+      .from('data')
+      .select('*')
+      .order('waktu', { ascending: false })
+      .limit(jumlah);
+
+    if (data?.length) {
+      const reversed = data.reverse();
+
+      kelembapanChart.data.labels = reversed.map(item => {
+        const waktuUTC = new Date(item.waktu);
+        const waktuWIB = new Date(waktuUTC.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+
+        const tanggal = waktuWIB.toLocaleDateString('id-ID', {
+          day: '2-digit', month: '2-digit', year: '2-digit'
+        });
+
+        const jam = waktuWIB.toLocaleTimeString('id-ID', {
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+          hour12: false
+        });
+
+        return `${tanggal} ${jam}`;
+      });
+
+      kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
+      kelembapanChart.update();
+
+      updateTabelKelembapan(reversed);
+    }
+  } catch (error) {
+    console.error('Gagal fetch data chart:', error);
+  }
 }
-
 
 setInterval(() => {
   initChart();
