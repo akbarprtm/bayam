@@ -88,9 +88,9 @@ function updateChart(data) {
 // Ambil data dan update UI
 async function fetchLatestData() {
   const { data, error } = await supabase
-    .from('penyiraman')
+    .from('data')
     .select('*')
-    .order('waktu', { ascending: true })
+    .order('waktu', { ascending: false })
     .limit(10);
 
   if (error) {
