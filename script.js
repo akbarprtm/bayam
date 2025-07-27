@@ -56,7 +56,7 @@ function initChart() {
 
 // Ambil data terakhir untuk ditampilkan di card
 async function fetchLatestData() {
-  const { data: sensor_data } = await supabase
+  const { data: kelembapan } = await supabase
     .from('sensor_data')
     .select('*')
     .order('waktu', { ascending: false })
@@ -142,7 +142,7 @@ async function fetchChartData() {
   const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
 
   // Ambil data sensor
-  const { data: sensorData } = await supabase
+  const { data: kelembapan } = await supabase
     .from('sensor_data')
     .select('*')
     .order('waktu', { ascending: false })
