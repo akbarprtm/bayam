@@ -6,6 +6,19 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let kelembapanChart;
 
+function formatWaktuKeWIB(waktuUTC) {
+  const date = new Date(waktuUTC);
+  date.setHours(date.getHours() + 7); // konversi ke WIB
+
+  const tanggal = date.toLocaleDateString('id-ID');
+  const jam = date.toLocaleTimeString('id-ID', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false
+  });
+
+  return `${tanggal}, ${jam}`;
+}
+
 function initChart() {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
   kelembapanChart = new Chart(ctx, {
@@ -53,18 +66,7 @@ function initChart() {
   });
 }
 
-function formatWaktuKeWIB(waktuUTC) {
-  const date = new Date(waktuUTC);
-  date.setHours(date.getHours() + 7); // konversi ke WIB
 
-  const tanggal = date.toLocaleDateString('id-ID');
-  const jam = date.toLocaleTimeString('id-ID', {
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hour12: false
-  });
-
-  return `${tanggal}, ${jam}`;
-}
 
 async function fetchLatestData() {
   try {
