@@ -100,15 +100,17 @@ async function fetchLatestData() {
   }
 }
 
-
 function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
+  if (!tbody) {
+    console.error('Elemen dengan id="tabelKelembapan" tidak ditemukan!');
+    return;
+  }
+
   tbody.innerHTML = '';
 
   data.slice().reverse().forEach((item, index) => {
-    const waktuWIB = formatWaktuKeWIB(item.waktu).split(', ');
-    const tanggal = waktuWIB[0];
-    const jam = waktuWIB[1];
+    const { tanggal, jam } = konversiWaktuUTCkeWIB(item.waktu); // Pastikan fungsi ini ada dan benar
 
     const durasi = item.durasi_detik || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
@@ -126,6 +128,7 @@ function updateTabelKelembapan(data) {
     `;
   });
 }
+
 async function fetchChartData() {
   try {
     const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
