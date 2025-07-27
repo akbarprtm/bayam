@@ -68,9 +68,14 @@ async function fetchLatestData() {
       document.getElementById('kelembapan').textContent = data[0].kelembapan + '%';
 
       const waktu = new Date(data[0].waktu).toLocaleString('id-ID', {
-        day: '2-digit', month: '2-digit', year: '2-digit',
-        hour: '2-digit', minute: '2-digit',
-        hour12: false, timeZone: 'Asia/Jakarta'
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Jakarta'
       });
       document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
     }
@@ -162,12 +167,17 @@ async function fetchChartData() {
       kelembapanChart.data.labels = reversed.map(item => {
         const waktu = new Date(item.waktu);
         const tanggal = waktu.toLocaleDateString('id-ID', {
-          day: '2-digit', month: '2-digit', year: '2-digit',
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit',
           timeZone: 'Asia/Jakarta'
         });
         const jam = waktu.toLocaleTimeString('id-ID', {
-          hour: '2-digit', minute: '2-digit',
-          hour12: false, timeZone: 'Asia/Jakarta'
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+          timeZone: 'Asia/Jakarta'
         });
         return `${tanggal} ${jam}`;
       });
@@ -181,7 +191,6 @@ async function fetchChartData() {
     console.error('Gagal fetch data chart:', error);
   }
 }
-
 
 // Inisialisasi awal
 initChart();
