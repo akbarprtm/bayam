@@ -112,7 +112,7 @@ function updateTabelKelembapan(data) {
   data.slice().reverse().forEach((item, index) => {
     const { tanggal, jam } = konversiWaktuUTCkeWIB(item.waktu); // Pastikan fungsi ini ada dan benar
 
-    const durasi = item.durasi_detik || 0;
+    const durasi = item.durasi || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
 
