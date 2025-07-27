@@ -6,6 +6,20 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let kelembapanChart;
 
+function formatWaktuKeWIB(utcString) {
+  return new Date(utcString).toLocaleString("id-ID", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  });
+}
+
+
 function initChart() {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
   kelembapanChart = new Chart(ctx, {
@@ -52,31 +66,6 @@ function initChart() {
     }
   });
 }
-
-function konversiWaktuUTCkeWIB(utcString) {
-  const formatterTanggal = new Intl.DateTimeFormat('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit'
-  });
-
-  const formatterJam = new Intl.DateTimeFormat('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-
-  const date = new Date(utcString);
-
-  return {
-    tanggal: formatterTanggal.format(date),
-    jam: formatterJam.format(date)
-  };
-}
-
 async function fetchLatestData() {
   try {
     const { data } = await supabase
@@ -88,8 +77,8 @@ async function fetchLatestData() {
     if (data?.length) {
       document.getElementById('kelembapan').textContent = data[0].kelembapan + '%';
 
-      const { tanggal, jam } = konversiWaktuUTCkeWIB(data[0].waktu);
-      document.getElementById('waktuPenyiraman').textContent = `${tanggal} ${jam} WIB`;
+      const waktu = formatWaktuKeWIB(data[0].waktu);
+      document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
     }
   } catch (error) {
     console.error('Gagal fetch data terbaru:', error);
@@ -133,8 +122,7 @@ async function fetchChartData() {
       const reversed = data.reverse();
 
       kelembapanChart.data.labels = reversed.map(item => {
-        const { tanggal, jam } = konversiWaktuUTCkeWIB(item.waktu);
-        return `${tanggal} ${jam}`;
+        return formatWaktuKeWIB(item.waktu);
       });
 
       kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
