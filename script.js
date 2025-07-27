@@ -117,45 +117,6 @@ function updateTabelKelembapan(data) {
   });
 }
 
-// Fungsi unduh CSV
-async function unduhCSV() {
-  try {
-    const { data, error } = await supabase
-      .from('data')
-      .select('*')
-      .order('waktu', { ascending: false });
-
-    if (error) {
-      console.error('Gagal ambil data:', error);
-      return;
-    }
-
-    if (!data || !data.length) {
-      alert('Tidak ada data untuk diunduh.');
-      return;
-    }
-
-    const header = Object.keys(data[0]);
-    const csvRows = [
-      header.join(','), // Baris header
-      ...data.map(row => header.map(field => `"${(row[field] ?? '').toString().replace(/"/g, '""')}"`).join(','))
-    ];
-
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'data_penyiraman.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error('Terjadi kesalahan saat mengunduh CSV:', err);
-  }
-}
 
 // Ambil data untuk grafik dan tabel
 async function fetchChartData() {
