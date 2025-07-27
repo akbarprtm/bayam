@@ -87,13 +87,11 @@ function updateTabelKelembapan(data) {
   const reversedData = [...data].reverse();
   reversedData.forEach((item, index) => {
     const waktu = new Date(item.waktu);
-    const tanggal = waktu.toLocaleDateString('id-ID', {
-      day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'Asia/Jakarta'
-    });
-    const jam = waktu.toLocaleTimeString('id-ID', {
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      hour12: false, timeZone: 'Asia/Jakarta'
-    });
+    waktu.setHours(waktu.getHours() + 7);
+
+    const tanggal = waktu.toLocaleDateString('id-ID');
+    const jam = waktu.toLocaleTimeString('id-ID', { hour12: false });
+
 
     const durasi = item.durasi_detik || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
