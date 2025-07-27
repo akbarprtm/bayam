@@ -121,7 +121,21 @@ async function fetchChartData() {
 
     if (data?.length) {
       const reversed = data.reverse();
-
+        const waktu = new Date(item.waktu);
+        const tanggal = waktu.toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit',
+          timeZone: 'Asia/Jakarta'
+        });
+        
+        const jam = waktu.toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+          timeZone: 'Asia/Jakarta'
+        });
       kelembapanChart.data.labels = reversed.map(item => {
         return `${tanggal} ${jam}`;
       });
