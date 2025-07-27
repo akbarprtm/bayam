@@ -58,24 +58,16 @@ function initChart() {
 // Ambil data terakhir
 async function fetchLatestData() {
   try {
-    const { data: kelembapan } = await supabase
-      .from('sensor_data')
+    const { data } = await supabase
+      .from('data')
       .select('*')
       .order('waktu', { ascending: false })
       .limit(1);
 
-    const { data: penyiraman } = await supabase
-      .from('penyiraman')
-      .select('*')
-      .order('waktu', { ascending: false })
-      .limit(1);
+    if (data?.length) {
+      document.getElementById('kelembapan').textContent = data[0].kelembapan + '%';
 
-    if (kelembapan?.length) {
-      document.getElementById('kelembapan').textContent = kelembapan[0].kelembapan + '%';
-    }
-
-    if (penyiraman?.length) {
-      const waktu = new Date(penyiraman[0].waktu).toLocaleString('id-ID', {
+      const waktu = new Date(data[0].waktu).toLocaleString('id-ID', {
         day: '2-digit', month: '2-digit', year: '2-digit',
         hour: '2-digit', minute: '2-digit',
         hour12: false, timeZone: 'Asia/Jakarta'
@@ -86,6 +78,7 @@ async function fetchLatestData() {
     console.error('Gagal fetch data terbaru:', error);
   }
 }
+
 
 // Perbarui isi tabel
 function updateTabelKelembapan(data) {
@@ -157,20 +150,14 @@ async function fetchChartData() {
   try {
     const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
 
-    const { data: sensorData } = await supabase
-      .from('sensor_data')
+    const { data } = await supabase
+      .from('data')
       .select('*')
       .order('waktu', { ascending: false })
       .limit(jumlah);
 
-    const { data: penyiramanData } = await supabase
-      .from('penyiraman')
-      .select('waktu, durasi_detik, metode')
-      .order('waktu', { ascending: false })
-      .limit(50);
-
-    if (sensorData?.length) {
-      const reversed = sensorData.reverse();
+    if (data?.length) {
+      const reversed = data.reverse();
 
       kelembapanChart.data.labels = reversed.map(item => {
         const waktu = new Date(item.waktu);
@@ -188,26 +175,13 @@ async function fetchChartData() {
       kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
       kelembapanChart.update();
 
-      const gabungan = reversed.map(sensor => {
-        const waktuSensor = new Date(sensor.waktu);
-        const penyiramanTerdekat = penyiramanData.find(p => {
-          const waktuPenyiraman = new Date(p.waktu);
-          return Math.abs(waktuSensor - waktuPenyiraman) <= 5 * 60 * 1000; // ±5 menit
-        });
-
-        return {
-          ...sensor,
-          durasi_detik: penyiramanTerdekat?.durasi_detik ?? 0,
-          metode: penyiramanTerdekat?.metode ?? '-',
-        };
-      });
-
-      updateTabelKelembapan(gabungan);
+      updateTabelKelembapan(reversed);
     }
   } catch (error) {
     console.error('Gagal fetch data chart:', error);
   }
 }
+
 
 // Inisialisasi awal
 initChart();
