@@ -64,7 +64,7 @@ async function fetchLatestData() {
     if (data?.length) {
       document.getElementById('kelembapan').textContent = data[0].kelembapan + '%';
 
-      const waktu = new Date(data[0].waktu).toLocaleString('id-ID', {
+      const waktu = new Date(data[0].waktu + ' GMT+0700').toLocaleString('id-ID', {
         day: '2-digit',
         month: '2-digit',
         year: '2-digit',
@@ -72,7 +72,6 @@ async function fetchLatestData() {
         minute: '2-digit',
         second: '2-digit',
         hour12: false,
-        timeZone: 'Asia/Jakarta'
       });
       document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
     }
@@ -87,7 +86,7 @@ function updateTabelKelembapan(data) {
 
   const reversedData = [...data].reverse();
   reversedData.forEach((item, index) => {
-    const waktu = new Date(item.waktu);
+    const waktu = new Date(item.waktu + ' GMT+0700');
     const tanggal = waktu.toLocaleDateString('id-ID', {
       day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'Asia/Jakarta'
     });
@@ -127,7 +126,7 @@ async function fetchChartData() {
       const reversed = data.reverse();
 
       kelembapanChart.data.labels = reversed.map(item => {
-        const waktu = new Date(item.waktu);
+        const waktu = new Date(item.waktu + ' GMT+0700');
         const tanggal = waktu.toLocaleDateString('id-ID', {
           day: '2-digit', month: '2-digit', year: '2-digit',
           timeZone: 'Asia/Jakarta'
