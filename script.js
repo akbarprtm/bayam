@@ -103,21 +103,19 @@ function updateTabelKelembapan(data) {
       hour12: false, timeZone: 'Asia/Jakarta'
     });
 
-    const kelembapan = item.kelembapan || '-';
     const durasi = item.durasi_detik || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
 
-    const row = `
+    tabel.innerHTML += `
       <tr class="border-t">
         <td class="px-4 py-2">${tanggal}</td>
         <td class="px-4 py-2">${jam}</td>
-        <td class="px-4 py-2">${kelembapan}%</td>
+        <td class="px-4 py-2">${item.kelembapan}%</td>
         <td class="px-4 py-2">${durasi}</td>
         <td class="px-4 py-2">${metode}</td>
       </tr>
     `;
-    tabel.innerHTML += row;
   });
 }
 
@@ -159,17 +157,21 @@ async function fetchChartData() {
   try {
     const jumlah = parseInt(document.getElementById('jumlahData')?.value) || 7;
 
-    // Ambil data penyiraman saja (karena durasi & metode dari sini)
-    const { data: penyiramanData } = await supabase
-      .from('penyiraman')
-      .select('waktu, durasi_detik, metode, kelembapan')
+    const { data: sensorData } = await supabase
+      .from('sensor_data')
+      .select('*')
       .order('waktu', { ascending: false })
       .limit(jumlah);
 
-    if (penyiramanData?.length) {
-      const reversed = penyiramanData.reverse();
+    const { data: penyiramanData } = await supabase
+      .from('penyiraman')
+      .select('waktu, durasi_detik, metode')
+      .order('waktu', { ascending: false })
+      .limit(50);
 
-      // Update chart
+    if (sensorData?.length) {
+      const reversed = sensorData.reverse();
+
       kelembapanChart.data.labels = reversed.map(item => {
         const waktu = new Date(item.waktu);
         const tanggal = waktu.toLocaleDateString('id-ID', {
@@ -186,11 +188,24 @@ async function fetchChartData() {
       kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
       kelembapanChart.update();
 
-      // Tampilkan tabel dari data penyiraman
-      updateTabelKelembapan(reversed);
+      const gabungan = reversed.map(sensor => {
+        const waktuSensor = new Date(sensor.waktu);
+        const penyiramanTerdekat = penyiramanData.find(p => {
+          const waktuPenyiraman = new Date(p.waktu);
+          return Math.abs(waktuSensor - waktuPenyiraman) <= 5 * 60 * 1000; // ±5 menit
+        });
+
+        return {
+          ...sensor,
+          durasi_detik: penyiramanTerdekat?.durasi_detik ?? 0,
+          metode: penyiramanTerdekat?.metode ?? '-',
+        };
+      });
+
+      updateTabelKelembapan(gabungan);
     }
   } catch (error) {
-    console.error('Gagal ambil data penyiraman:', error);
+    console.error('Gagal fetch data chart:', error);
   }
 }
 
