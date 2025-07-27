@@ -56,7 +56,7 @@ function initChart() {
 
 // Ambil data terakhir untuk ditampilkan di card
 async function fetchLatestData() {
-  const { data: kelembapan } = await supabase
+  const { data: sensor_data } = await supabase
     .from('sensor_data')
     .select('*')
     .order('waktu', { ascending: false })
