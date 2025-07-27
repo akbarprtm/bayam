@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Monitoring Kelembapan</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <title>Monitoring Kelembapan</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 p-6">
@@ -20,36 +18,37 @@
       <p id="waktuPenyiraman" class="text-gray-500 text-sm mt-1">--</p>
     </div>
 
+    <!-- Grafik Kelembapan -->
     <div class="bg-white rounded-lg shadow-md p-6">
       <h2 class="text-lg font-semibold text-gray-700 mb-4">Grafik Kelembaban Tanah</h2>
       <canvas id="chartKelembapan" height="100"></canvas>
-    <!-- Chart -->
-    <canvas id="kelembapanChart" class="bg-white rounded-lg shadow-md p-4"></canvas>
 
-    <!-- Pilih Jumlah Data -->
-    <div class="mt-4">
-      <label for="jumlahData" class="text-sm">Tampilkan Data Terakhir:</label>
-      <select id="jumlahData" class="ml-2 border rounded p-1" onchange="fetchChartData()">
-        <option value="7">7</option>
-        <option value="15">15</option>
-        <option value="30">30</option>
-        <option value="50">50</option>
-      </select>
+      <!-- Pilih Jumlah Data -->
+      <div class="mt-4">
+        <label for="jumlahData" class="text-sm">Tampilkan Data Terakhir:</label>
+        <select id="jumlahData" class="ml-2 border rounded p-1" onchange="fetchChartData()">
+          <option value="7">7</option>
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="50">50</option>
+        </select>
+      </div>
     </div>
 
+    <!-- Tabel Kelembapan -->
     <div class="bg-white rounded-lg shadow-md p-6 mt-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
         <h2 class="text-lg font-semibold text-gray-700 text-center md:text-left">Data Kelembapan Terbaru</h2>
         <div class="flex items-center gap-2">
-          <label for="jumlahData" class="text-sm text-gray-700">Jumlah data:</label>
-          <input id="jumlahData" type="number" min="1" value="7" class="w-20 px-2 py-1 border rounded text-center text-sm" />
+          <label for="jumlahDataTabel" class="text-sm text-gray-700">Jumlah data:</label>
+          <input id="jumlahDataTabel" type="number" min="1" value="7" class="w-20 px-2 py-1 border rounded text-center text-sm" />
           <button onclick="unduhCSV()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
             Unduh CSV
           </button>
         </div>
       </div>
       <div class="overflow-x-auto">
-        <table id="tabel-kelembapan" class="table-auto w-full mt-4 border-collapse border">
+        <table id="tabelKelembapan" class="table-auto w-full mt-4 border-collapse border">
           <thead>
             <tr class="bg-gray-200 text-gray-700">
               <th class="border px-4 py-2">No</th>
@@ -61,12 +60,14 @@
             </tr>
           </thead>
           <tbody class="text-center text-gray-700 bg-white">
-            <!-- Data akan ditambahkan di sini -->
+            <!-- Data akan ditambahkan di sini oleh script.js -->
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
 
-  <script type="module" src="script.js"></script>
+  <!-- Script untuk ekspor CSV -->
   <script>
     function downloadCSV(csv, filename) {
       const csvFile = new Blob([csv], { type: "text/csv" });
@@ -80,7 +81,7 @@
     }
 
     function exportTableToCSV(filename) {
-      const rows = document.querySelectorAll("#tabelKelembapan tr");
+      const rows = document.querySelectorAll("#tabel-kelembapan tr");
       let csv = [];
 
       for (const row of rows) {
@@ -99,6 +100,8 @@
       exportTableToCSV("data_kelembapan.csv");
     }
   </script>
-  <script src="script.js"></script>
+
+  <!-- Script Utama -->
+  <script type="module" src="script.js"></script>
 </body>
 </html>
