@@ -85,9 +85,7 @@ function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
   tbody.innerHTML = '';
 
-  const reversedData = [...data].reverse();
-
-  reversedData.forEach((item, index) => {
+  data.forEach((item, index) => {
     const waktu = new Date(item.waktu);
     const tanggal = waktu.toLocaleDateString('id-ID', {
       day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'Asia/Jakarta'
