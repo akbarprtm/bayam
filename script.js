@@ -58,7 +58,7 @@ async function fetchLatestData() {
     const { data } = await supabase
       .from('data')
       .select('*')
-      .order('waktu', { ascending: false })
+      .order('waktu', { ascending: true })
       .limit(1);
 
     if (data?.length) {
@@ -130,6 +130,7 @@ async function fetchChartData() {
           year: '2-digit',
           timeZone: 'Asia/Jakarta'
         });
+        
         const jam = waktu.toLocaleTimeString('id-ID', {
           hour: '2-digit',
           minute: '2-digit',
