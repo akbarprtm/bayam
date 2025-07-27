@@ -62,9 +62,11 @@ async function fetchLatestData() {
       .limit(1);
 
     if (data?.length) {
-      document.getElementById('kelembapan').textContent = data[0].kelembapan + '%';
+      const latest = data[0];
+      document.getElementById('kelembapan').textContent = latest.kelembapan + '%';
 
-       const waktu = new Date(data[0].waktu).toLocaleString('id-ID', {
+      const waktu = new Date(latest.waktu).toLocaleString('id-ID', {
+        timeZone: 'Asia/Jakarta',
         day: '2-digit',
         month: '2-digit',
         year: '2-digit',
@@ -73,7 +75,8 @@ async function fetchLatestData() {
         second: '2-digit',
         hour12: false,
       });
-      document.getElementById('waktuPenyiraman').textContent = waktu + ' WIB';
+      const elemenWaktu = document.getElementById('waktuPenyiraman');
+      if (elemenWaktu) elemenWaktu.textContent = waktu + ' WIB';
     }
   } catch (error) {
     console.error('Gagal fetch data terbaru:', error);
@@ -84,24 +87,22 @@ function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
   tbody.innerHTML = '';
 
-  const reversedData = [...data].reverse();
-  reversedData.forEach((item, index) => {
-    const waktuUTC = new Date(item.waktu); // waktu dari Supabase
-    const waktuWIB = new Date(waktuUTC.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+  data.forEach((item, index) => {
+    const waktuWIB = new Date(item.waktu).toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
+    const waktuDate = new Date(waktuWIB);
 
-    const tanggal = waktuWIB.toLocaleDateString("id-ID", {
+    const tanggal = waktuDate.toLocaleDateString("id-ID", {
       day: "2-digit",
       month: "2-digit",
       year: "2-digit"
     });
-    
-    const jam = waktuWIB.toLocaleTimeString("id-ID", {
+
+    const jam = waktuDate.toLocaleTimeString("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
       hour12: false
     });
-
 
     const durasi = item.durasi_detik || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
@@ -131,17 +132,15 @@ async function fetchChartData() {
       .limit(jumlah);
 
     if (data?.length) {
-      const reversed = data.reverse();
+      const reversed = [...data].reverse();
 
       kelembapanChart.data.labels = reversed.map(item => {
-        const waktu = new Date(item.waktu);
-        const tanggal = waktu.toLocaleDateString('id-ID', {
-          day: '2-digit', month: '2-digit', year: '2-digit',
-          timeZone: 'Asia/Jakarta'
-        });
-        const jam = waktu.toLocaleTimeString('id-ID', {
+        const waktu = new Date(item.waktu).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' });
+        const dateObj = new Date(waktu);
+        const tanggal = dateObj.toLocaleDateString('id-ID');
+        const jam = dateObj.toLocaleTimeString('id-ID', {
           hour: '2-digit', minute: '2-digit', second: '2-digit',
-          hour12: false, timeZone: 'Asia/Jakarta'
+          hour12: false
         });
         return `${tanggal} ${jam}`;
       });
@@ -149,7 +148,7 @@ async function fetchChartData() {
       kelembapanChart.data.datasets[0].data = reversed.map(item => item.kelembapan);
       kelembapanChart.update();
 
-      updateTabelKelembapan(reversed);
+      updateTabelKelembapan(data); // urutkan dari terbaru ke terlama
     }
   } catch (error) {
     console.error('Gagal fetch data chart:', error);
