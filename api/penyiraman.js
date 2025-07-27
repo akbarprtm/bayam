@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   'https://ctggbrmvubjggyxmmbse.supabase.co',
-  'YOUR_SUPABASE_SERVICE_ROLE_KEY' // Jangan pakai anon key untuk insert langsung dari server
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA' // Jangan pakai anon key untuk insert langsung dari server
 )
 
 export default async function handler(req, res) {
