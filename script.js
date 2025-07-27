@@ -58,7 +58,7 @@ async function fetchLatestData() {
     const { data } = await supabase
       .from('data')
       .select('*')
-      .order('waktu', { descending: true })
+      .order('waktu', { ascending: false })
       .limit(1);
 
     if (data?.length) {
