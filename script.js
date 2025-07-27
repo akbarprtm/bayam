@@ -29,7 +29,7 @@ function updateTabelKelembapan(data) {
   data.slice().reverse().forEach((item, index) => {
     const { tanggal, jam } = konversiWaktuUTCkeWIB(item.waktu);
 
-    const durasi = item.durasi_detik || 0;
+    const durasi = item.durasi || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
 
@@ -90,7 +90,7 @@ async function fetchLatestData() {
   const { data, error } = await supabase
     .from('penyiraman')
     .select('*')
-    .order('waktu', { ascending: false })
+    .order('waktu', { ascending: true })
     .limit(10);
 
   if (error) {
