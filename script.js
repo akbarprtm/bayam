@@ -90,7 +90,7 @@ async function fetchLatestData() {
   const { data, error } = await supabase
     .from('data')
     .select('*')
-    .order('waktu', { ascending: true })
+    .order('waktu', { ascending: false })
     .limit(10);
 
   if (error) {
