@@ -3,98 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Monitoring Kelembapan</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Monitoring Kelembapan</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen">
-  <div class="max-w-3xl mx-auto p-4">
-    <header class="mb-6">
-      <h1 class="text-3xl font-bold text-center text-green-700">🌿 Dashboard Monitoring Tanaman</h1>
-      <p class="text-center text-sm text-gray-600">Pemantauan kelembapan tanah & penyiraman otomatis</p>
-    </header>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <div class="bg-white rounded-lg shadow-md p-4">
-        <h2 class="text-lg font-semibold text-gray-700">Kelembapan Tanah Saat Ini</h2>
-        <p id="kelembapan" class="text-5xl font-bold text-green-600 mt-2">--%</p>
-      </div>
-
-      <div class="bg-white rounded-lg shadow-md p-4">
-        <h2 class="text-lg font-semibold text-gray-700">Waktu Penyiraman Terakhir</h2>
-        <p id="waktuPenyiraman" class="text-xl mt-2">--</p>
-      </div>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-4xl mx-auto space-y-6">
+    <!-- Kelembapan Saat Ini -->
+    <div class="bg-white rounded-lg shadow-md p-4">
+      <h2 class="text-lg font-semibold text-gray-700">Kelembapan Tanah Saat Ini</h2>
+      <p id="kelembapan" class="text-5xl font-bold text-green-600 mt-2">--%</p>
+      <p id="waktuPenyiraman" class="text-gray-500 text-sm mt-1">--</p>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-lg font-semibold text-gray-700 mb-4">Grafik Kelembaban Tanah</h2>
-      <canvas id="chartKelembapan" height="100"></canvas>
+    <!-- Chart -->
+    <canvas id="kelembapanChart" class="bg-white rounded-lg shadow-md p-4"></canvas>
+
+    <!-- Pilih Jumlah Data -->
+    <div class="mt-4">
+      <label for="jumlahData" class="text-sm">Tampilkan Data Terakhir:</label>
+      <select id="jumlahData" class="ml-2 border rounded p-1" onchange="fetchChartData()">
+        <option value="7">7</option>
+        <option value="15">15</option>
+        <option value="30">30</option>
+        <option value="50">50</option>
+      </select>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-        <h2 class="text-lg font-semibold text-gray-700 text-center md:text-left">Data Kelembapan Terbaru</h2>
-        <div class="flex items-center gap-2">
-          <label for="jumlahData" class="text-sm text-gray-700">Jumlah data:</label>
-          <input id="jumlahData" type="number" min="1" value="7" class="w-20 px-2 py-1 border rounded text-center text-sm" />
-          <button onclick="unduhCSV()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
-            Unduh CSV
-          </button>
-        </div>
-      </div>
-      <div class="overflow-x-auto">
-        <table id="tabel-kelembapan" class="table-auto w-full mt-4 border-collapse border">
-          <thead>
-            <tr class="bg-gray-200 text-gray-700">
-              <th class="border px-4 py-2">No</th>
-              <th class="border px-4 py-2">Kelembapan</th>
-              <th class="border px-4 py-2">Metode</th>
-              <th class="border px-4 py-2">Durasi</th>
-              <th class="border px-4 py-2">Tanggal</th>
-              <th class="border px-4 py-2">Jam</th>
-            </tr>
-          </thead>
-          <tbody class="text-center text-gray-700 bg-white">
-            <!-- Data akan ditambahkan di sini -->
-          </tbody>
-        </table>
-      </div>
+    <!-- Tabel Data -->
+    <div class="bg-white rounded-lg shadow-md overflow-x-auto mt-4">
+      <table class="min-w-full text-sm text-left">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="px-4 py-2 text-center">No</th>
+            <th class="px-4 py-2">Tanggal</th>
+            <th class="px-4 py-2">Jam</th>
+            <th class="px-4 py-2">Kelembapan</th>
+            <th class="px-4 py-2">Durasi</th>
+            <th class="px-4 py-2">Metode</th>
+          </tr>
+        </thead>
+        <tbody id="tabelKelembapan" class="divide-y"></tbody>
+      </table>
     </div>
   </div>
 
-  <script type="module" src="script.js"></script>
-  <script>
-    function downloadCSV(csv, filename) {
-      const csvFile = new Blob([csv], { type: "text/csv" });
-      const downloadLink = document.createElement("a");
-      downloadLink.download = filename;
-      downloadLink.href = window.URL.createObjectURL(csvFile);
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    }
-
-    function exportTableToCSV(filename) {
-      const rows = document.querySelectorAll("#tabelKelembapan tr");
-      let csv = [];
-
-      for (const row of rows) {
-        const cols = row.querySelectorAll("td, th");
-        let rowData = [];
-        for (const col of cols) {
-          rowData.push('"' + col.innerText.replace(/"/g, '""') + '"');
-        }
-        csv.push(rowData.join(","));
-      }
-
-      downloadCSV(csv.join("\n"), filename);
-    }
-
-    function unduhCSV() {
-      exportTableToCSV("data_kelembapan.csv");
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
