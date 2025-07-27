@@ -118,37 +118,44 @@ function updateTabelKelembapan(data) {
 }
 
 // Fungsi unduh CSV
-function unduhCSV() {
-  const rows = [['Tanggal', 'Jam', 'Kelembapan (%)', 'Durasi (detik)', 'Metode']];
-  const tabel = document.querySelectorAll('#tabelKelembapan tr');
+async function unduhCSV() {
+  try {
+    const { data, error } = await supabase
+      .from('data')
+      .select('*')
+      .order('waktu', { ascending: false });
 
-  if (!tabel.length) {
-    alert("Tidak ada data untuk diunduh.");
-    return;
-  }
-
-  tabel.forEach(row => {
-    const cells = row.querySelectorAll('td');
-    if (cells.length) {
-      const rowData = Array.from(cells).map(cell => {
-        // Escape tanda koma
-        return `"${cell.textContent.replace(/"/g, '""')}"`;
-      });
-      rows.push(rowData);
+    if (error) {
+      console.error('Gagal ambil data:', error);
+      return;
     }
-  });
 
-  const csvContent = rows.map(e => e.join(',')).join('\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    if (!data || !data.length) {
+      alert('Tidak ada data untuk diunduh.');
+      return;
+    }
 
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'data_kelembapan.csv';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    const header = Object.keys(data[0]);
+    const csvRows = [
+      header.join(','), // Baris header
+      ...data.map(row => header.map(field => `"${(row[field] ?? '').toString().replace(/"/g, '""')}"`).join(','))
+    ];
+
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data_penyiraman.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('Terjadi kesalahan saat mengunduh CSV:', err);
+  }
 }
-
 
 // Ambil data untuk grafik dan tabel
 async function fetchChartData() {
@@ -194,9 +201,6 @@ async function fetchChartData() {
 
 // Inisialisasi awal
 initChart();
-fetchLatestData();
-fetchChartData();
-
 // Auto refresh setiap 5 detik
 setInterval(() => {
   fetchLatestData();
