@@ -85,7 +85,7 @@ function updateTabelKelembapan(data) {
   const tabel = document.getElementById('tabelKelembapan');
   tabel.innerHTML = '';
 
-  data.forEach(item => {
+  data.forEach((item, index) => {
     const waktu = new Date(item.waktu);
     const tanggal = waktu.toLocaleDateString('id-ID', {
       day: '2-digit', month: '2-digit', year: '2-digit',
@@ -102,6 +102,7 @@ function updateTabelKelembapan(data) {
 
     tabel.innerHTML += `
       <tr class="border-t">
+        <td class="px-4 py-2 text-center">${index + 1}</td>
         <td class="px-4 py-2">${tanggal}</td>
         <td class="px-4 py-2">${jam}</td>
         <td class="px-4 py-2">${item.kelembapan}%</td>
