@@ -121,7 +121,7 @@ async function fetchChartData() {
     const { data } = await supabase
       .from('data')
       .select('*')
-      .order('waktu', { ascending: true })
+      .order('waktu', { ascending: false })
       .limit(jumlah);
 
     if (data?.length) {
