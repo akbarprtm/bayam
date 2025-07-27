@@ -4,54 +4,40 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let kelembapanChart;
 
-function initChart() {
+let kelembapanChart = null; // Variabel global
+
+function updateChart(data) {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
+
+  if (kelembapanChart) {
+    kelembapanChart.destroy(); // Hancurkan chart lama
+  }
+
+  const labels = data.map(item => new Date(item.waktu).toLocaleTimeString('id-ID'));
+  const values = data.map(item => item.kelembapan);
+
   kelembapanChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: [],
+      labels: labels,
       datasets: [{
         label: 'Kelembapan (%)',
-        data: [],
-        fill: true,
-        borderColor: 'rgb(34,197,94)',
-        backgroundColor: 'rgba(34,197,94,0.2)',
-        tension: 0.3
+        data: values,
+        borderColor: 'blue',
+        fill: false
       }]
     },
     options: {
       responsive: true,
-      animation: {
-        duration: 800,
-        easing: 'easeInOutQuart'
-      },
-      plugins: {
-        legend: {
-          labels: { color: '#4B5563' }
-        }
-      },
+      animation: false,
       scales: {
-        x: {
-          ticks: {
-            color: '#4B5563',
-            maxRotation: 0,
-            callback(value) {
-              const label = this.getLabelForValue(value);
-              const [datePart, timePart] = label.split(' ');
-              return [datePart, timePart];
-            }
-          }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { color: '#4B5563' }
-        }
+        y: { beginAtZero: true }
       }
     }
   });
 }
+
 
 function konversiWaktuUTCkeWIB(utcString) {
   const waktuUTC = new Date(utcString);
@@ -98,6 +84,9 @@ async function fetchLatestData() {
   } catch (error) {
     console.error('Gagal fetch data terbaru:', error);
   }
+  // Tampilkan data ke tabel dan elemen
+  updateTabelKelembapan(data);
+  updateChart(data); // jika pakai chart
 }
 
 function updateTabelKelembapan(data) {
