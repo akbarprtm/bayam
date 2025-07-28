@@ -48,17 +48,12 @@ function updateChart(data) {
 
   if (kelembapanChart) kelembapanChart.destroy();
 
+  // Ambil jam tanpa konversi ke zona waktu lain
   const labels = data.map(item => {
-  const waktu = new Date(item.waktu);
-    return waktu.toLocaleTimeString('id-ID', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      timeZone: 'Asia/Jakarta'
-    });
+    const [tanggalPart, waktuPart] = item.waktu.split('T');
+    const [jam, menit, detik] = waktuPart.split(':');
+    return `${jam}:${menit}:${detik.slice(0, 2)}`;
   });
-
 
   const values = data.map(item => item.kelembapan);
 
