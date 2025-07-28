@@ -80,22 +80,25 @@
     }
   
     function exportTableToCSV(filename) {
-      const table = document.querySelector("table");
+      const jumlah = parseInt(document.getElementById("jumlahDataTabel").value) || 0;
+      const rows = document.querySelectorAll("#tabelKelembapan tr");
       let csv = [];
   
-      // Ambil baris header
-      const headers = Array.from(table.querySelectorAll("thead th")).map(th =>
-        `"${th.textContent.trim().replace(/"/g, '""')}"`
-      );
-      csv.push(headers.join(","));
+      // Header
+      const headerCols = document.querySelectorAll("thead th");
+      let headerData = [];
+      for (const col of headerCols) {
+        headerData.push('"' + col.innerText.replace(/"/g, '""') + '"');
+      }
+      csv.push(headerData.join(","));
   
-      // Ambil baris data
-      const rows = table.querySelectorAll("tbody tr");
-      for (const row of rows) {
-        const cols = row.querySelectorAll("td");
-        const rowData = Array.from(cols).map(td =>
-          `"${td.textContent.trim().replace(/"/g, '""')}"`
-        );
+      // Data
+      for (let i = 0; i < Math.min(jumlah, rows.length); i++) {
+        const cols = rows[i].querySelectorAll("td");
+        let rowData = [];
+        for (const col of cols) {
+          rowData.push('"' + col.innerText.replace(/"/g, '""') + '"');
+        }
         csv.push(rowData.join(","));
       }
   
@@ -106,6 +109,7 @@
       exportTableToCSV("data_kelembapan.csv");
     }
   </script>
+
 
 
   <!-- Script Utama -->
