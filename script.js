@@ -46,17 +46,16 @@ function updateTabelKelembapan(data) {
 
 
 // Fungsi update grafik Chart.js
-function updateChart(data) {
+ function updateChart(data) {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
 
   if (kelembapanChart) kelembapanChart.destroy();
 
+  // Ambil jam tanpa konversi ke zona waktu lain
   const labels = data.map(item => {
-    const [tanggalPart, waktuPart] = item.waktu.split('T'); // Misal: '2025-07-27', '20:47:00'
-    const tanggal = tanggalPart.split('-').reverse().join('/'); // jadi '27/07/25'
-    const jam = waktuPart.slice(0, 8); // Ambil '20:47:00'
-
-    return `${tanggal}\n${jam}`; // Tampilkan tanggal di atas jam
+    const [tanggalPart, waktuPart] = item.waktu.split('T');
+    const [jam, menit, detik] = waktuPart.split(':');
+    return ${jam}:${menit}:${detik.slice(0, 2)};
   });
 
   const values = data.map(item => item.kelembapan);
@@ -77,17 +76,6 @@ function updateChart(data) {
       responsive: true,
       animation: false,
       scales: {
-        x: {
-          ticks: {
-            callback: function(value, index) {
-              // Pakai format multi-baris
-              return this.getLabelForValue(index).split('\n');
-            },
-            autoSkip: true,
-            maxRotation: 0,
-            minRotation: 0,
-          }
-        },
         y: {
           beginAtZero: true,
           max: 100
