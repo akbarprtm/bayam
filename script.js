@@ -35,9 +35,9 @@ function updateTabelKelembapan(data) {
       <td>${index + 1}</td>
       <td>${waktu.tanggal}</td>
       <td>${waktu.jam}</td>
-      <td>${item.kelembapan}</td>
+      <td>${item.kelembapan} %</td>
+      <td>${item.durasi} detik</td>
       <td>${item.metode}</td>
-      <td>${item.durasi_detik} detik</td>
     `;
     tbody.appendChild(row);
   });
@@ -45,18 +45,27 @@ function updateTabelKelembapan(data) {
 
 // Fungsi update grafik
 function updateChart(data) {
-  const canvas = document.getElementById('chartKelembapan');
-  if (!canvas) {
-    console.error("Element chartKelembapan tidak ditemukan");
-    return;
-  }
-  const ctx = canvas.getContext('2d');
-
+  const ctx = document.getElementById('chartKelembapan').getContext('2d');
   if (kelembapanChart) kelembapanChart.destroy();
 
   const labels = data.map(item => {
-    const waktu = formatWaktuTanpaKonversi(item.waktu);
-    return `${waktu.tanggal}\n${waktu.jam}`;
+    const waktu = new Date(item.waktu);
+
+    const tanggal = waktu.toLocaleDateString('id-ID', {
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit'
+    });
+
+    const jam = waktu.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+
+    // Gabungkan dengan baris atas: tanggal di atas jam
+    return `${tanggal}\n${jam}`;
   });
 
   const values = data.map(item => item.kelembapan);
@@ -80,6 +89,13 @@ function updateChart(data) {
         y: {
           beginAtZero: true,
           max: 100
+        },
+        x: {
+          ticks: {
+            callback: function(value, index, ticks) {
+              return this.getLabelForValue(value).replace('\n', '\n');
+            }
+          }
         }
       }
     }
