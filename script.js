@@ -7,15 +7,13 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Variabel global untuk Chart
 let kelembapanChart = null;
 
-// Fungsi format waktu (langsung WIB)
+// Fungsi format waktu lokal WIB
 function formatWaktu(waktuStr) {
   const waktu = new Date(waktuStr);
   const tanggal = waktu.toLocaleDateString('id-ID', {
-    timeZone: 'Asia/Jakarta',
     day: '2-digit', month: '2-digit', year: '2-digit'
   });
   const jam = waktu.toLocaleTimeString('id-ID', {
-    timeZone: 'Asia/Jakarta',
     hour: '2-digit', minute: '2-digit', second: '2-digit',
     hour12: false
   });
@@ -56,10 +54,7 @@ function updateChart(data) {
   const labels = data.map(item => {
     const waktu = new Date(item.waktu);
     return waktu.toLocaleTimeString('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
       hour12: false
     });
   });
