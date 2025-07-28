@@ -19,28 +19,31 @@ function formatWaktuTanpaKonversi(isoString) {
 
 // Fungsi update tabel kelembapan
 function updateTabelKelembapan(data) {
-  const tbody = document.getElementById('tabelKelembapan');
+  const tbody = document.getElementById('tabelKelembapan').querySelector('tbody');
   tbody.innerHTML = '';
 
-  data.slice().reverse().forEach((item, index) => {
-    const waktu = formatWaktuTanpaKonversi(item.waktu);
+  // Balik urutan data agar yang terbaru muncul di atas
+  const reversedData = [...data].reverse();
 
-    const durasi = item.durasi || 0;
-    const metode = item.metode === 'manual' ? 'Manual' :
-                   item.metode === 'otomatis' ? 'Otomatis' : '-';
+  reversedData.forEach((item, index) => {
+    const [tanggalPart, waktuPart] = item.waktu.split('T');
+    const tanggal = tanggalPart.split('-').reverse().join('/'); // jadi 27/07/25
+    const [jam, menit, detik] = waktuPart.split(':');
+    const jamFormatted = `${jam}.${menit}.${detik.slice(0, 2)}`;
 
-    tbody.innerHTML += `
-      <tr class="border-t">
-        <td class="px-4 py-2 text-center">${index + 1}</td>
-        <td class="px-4 py-2">${waktu.tanggal}</td>
-        <td class="px-4 py-2">${waktu.jam}</td>
-        <td class="px-4 py-2">${item.kelembapan}%</td>
-        <td class="px-4 py-2">${durasi}</td>
-        <td class="px-4 py-2">${metode}</td>
-      </tr>
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${tanggal}</td>
+      <td>${jamFormatted}</td>
+      <td>${item.kelembapan}</td>
+      <td>${item.metode}</td>
+      <td>${item.durasi_detik} detik</td>
     `;
+    tbody.appendChild(row);
   });
 }
+
 
 // Fungsi update grafik Chart.js
 function updateChart(data) {
@@ -48,11 +51,12 @@ function updateChart(data) {
 
   if (kelembapanChart) kelembapanChart.destroy();
 
-  // Ambil jam tanpa konversi ke zona waktu lain
   const labels = data.map(item => {
-    const [tanggalPart, waktuPart] = item.waktu.split('T');
-    const [jam, menit, detik] = waktuPart.split(':');
-    return `${jam}:${menit}:${detik.slice(0, 2)}`;
+    const [tanggalPart, waktuPart] = item.waktu.split('T'); // Misal: '2025-07-27', '20:47:00'
+    const tanggal = tanggalPart.split('-').reverse().join('/'); // jadi '27/07/25'
+    const jam = waktuPart.slice(0, 8); // Ambil '20:47:00'
+
+    return `${tanggal}\n${jam}`; // Tampilkan tanggal di atas jam
   });
 
   const values = data.map(item => item.kelembapan);
@@ -73,6 +77,17 @@ function updateChart(data) {
       responsive: true,
       animation: false,
       scales: {
+        x: {
+          ticks: {
+            callback: function(value, index) {
+              // Pakai format multi-baris
+              return this.getLabelForValue(index).split('\n');
+            },
+            autoSkip: true,
+            maxRotation: 0,
+            minRotation: 0,
+          }
+        },
         y: {
           beginAtZero: true,
           max: 100
