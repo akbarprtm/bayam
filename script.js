@@ -107,6 +107,16 @@ async function fetchLatestData() {
       console.warn('Element kelembapanSekarang tidak ditemukan');
     }
   }
+  // Tampilkan waktu penyiraman terakhir
+  if (data.length > 0) {
+    const waktuEl = document.getElementById('waktuPenyiraman');
+    if (waktuEl) {
+      const waktuTerakhir = formatWaktuTanpaKonversi(data[0].waktu);
+      waktuEl.textContent = `${waktuTerakhir.tanggal} ${waktuTerakhir.jam}`;
+    } else {
+      console.warn('Element waktuPenyiraman tidak ditemukan');
+    }
+  }
 
   updateTabelKelembapan(data);
   updateChart(data);
