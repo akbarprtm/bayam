@@ -4,9 +4,23 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
 // Variabel global untuk Chart
 let kelembapanChart = null;
+
+// Fungsi format waktu (langsung WIB)
+function formatWaktu(waktuStr) {
+  const waktu = new Date(waktuStr);
+  const tanggal = waktu.toLocaleDateString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit', month: '2-digit', year: '2-digit'
+  });
+  const jam = waktu.toLocaleTimeString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false
+  });
+  return { tanggal, jam };
+}
 
 // Fungsi update tabel kelembapan
 function updateTabelKelembapan(data) {
@@ -14,7 +28,7 @@ function updateTabelKelembapan(data) {
   tbody.innerHTML = '';
 
   data.slice().reverse().forEach((item, index) => {
-    const waktu = formatWaktuWIB(item.waktu);
+    const waktu = formatWaktu(item.waktu);
     const durasi = item.durasi || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
@@ -37,11 +51,19 @@ function updateChart(data) {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
 
   // Hapus chart sebelumnya jika ada
-  if (kelembapanChart) {
-    kelembapanChart.destroy();
-  }
+  if (kelembapanChart) kelembapanChart.destroy();
 
-  const labels = data.map(item => formatWaktuWIB(item.waktu).jam);
+  const labels = data.map(item => {
+    const waktu = new Date(item.waktu);
+    return waktu.toLocaleTimeString('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  });
+
   const values = data.map(item => item.kelembapan);
 
   kelembapanChart = new Chart(ctx, {
