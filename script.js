@@ -6,8 +6,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ✅ Fungsi untuk konversi waktu UTC ke WIB dengan benar
 function konversiWaktuUTCkeWIB(utcString) {
-  // Pastikan dianggap UTC dengan menambahkan 'Z' jika belum ada
-  const waktuUTC = new Date(utcString.endsWith('Z') ? utcString : utcString + 'Z');
+  const waktuUTC = new Date(utcString); // Sudah UTC karena ada +00:00 dari Supabase
 
   const formatterTanggal = new Intl.DateTimeFormat('id-ID', {
     timeZone: 'Asia/Jakarta',
@@ -29,7 +28,6 @@ function konversiWaktuUTCkeWIB(utcString) {
 
   return { tanggal, jam };
 }
-
 
 // ✅ Update isi tabel dengan data terbaru
 function updateTabelKelembapan(data) {
