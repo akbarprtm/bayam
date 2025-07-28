@@ -35,6 +35,7 @@ function updateTabelKelembapan(data) {
   tbody.innerHTML = '';
 
   data.slice().reverse().forEach((item, index) => {
+    console.log('waktu asli:', item.waktu);
     const { tanggal, jam } = konversiWaktuUTCkeWIB(item.waktu);
     const durasi = item.durasi || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
