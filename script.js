@@ -21,7 +21,6 @@ function konversiWaktuUTCkeWIB(utcString) {
     second: '2-digit',
     hour12: false
   });
-
   const tanggal = formatterTanggal.format(waktuUTC);
   const jam = formatterJam.format(waktuUTC);
 
