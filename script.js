@@ -58,7 +58,7 @@ function updateChart(data) {
 
   const labels = data.map(item => {
     const waktu = formatWaktuTanpaKonversi(item.waktu);
-    return `${waktu.tanggal}\n${waktu.jam}`;
+    return [waktu.tanggal, waktu.jam]; // dua baris
   });
 
   const values = data.map(item => item.kelembapan);
@@ -79,6 +79,14 @@ function updateChart(data) {
       responsive: true,
       animation: false,
       scales: {
+        x: {
+          ticks: {
+            callback: function(value, index) {
+              const label = this.getLabelForValue(value);
+              return Array.isArray(label) ? label : [label];
+            }
+          }
+        },
         y: {
           beginAtZero: true,
           max: 100
@@ -87,6 +95,7 @@ function updateChart(data) {
     }
   });
 }
+
 
 // Ambil data dari Supabase
 async function fetchLatestData() {
