@@ -19,7 +19,7 @@ function formatWaktuTanpaKonversi(isoString) {
 
 // Fungsi update tabel
 function updateTabelKelembapan(data) {
-  const tbody = document.getElementById('tabelKelembapan')?.querySelector('tbody');
+  const tbody = document.getElementById('tabelKelembapan');
   if (!tbody) {
     console.error("Element tabelKelembapan atau tbody tidak ditemukan");
     return;
