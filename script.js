@@ -4,31 +4,6 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ✅ Fungsi untuk konversi waktu UTC ke WIB dengan benar
-function konversiWaktuUTCkeWIB(utcString) {
-  const waktuUTC = new Date(utcString);
-
-  const formatterTanggal = new Intl.DateTimeFormat('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit'
-  });
-
-  const formatterJam = new Intl.DateTimeFormat('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-
-  const tanggal = formatterTanggal.format(waktuUTC);
-  const jam = formatterJam.format(waktuUTC);
-
-  return { tanggal, jam };
-}
-
 
 // ✅ Update isi tabel dengan data terbaru
 function updateTabelKelembapan(data) {
@@ -36,23 +11,38 @@ function updateTabelKelembapan(data) {
   tbody.innerHTML = '';
 
   data.slice().reverse().forEach((item, index) => {
-    console.log('waktu asli:', item.waktu);
-    const { tanggal, jam } = konversiWaktuUTCkeWIB(item.waktu);
-    const durasi = item.durasi || 0;
-    const metode = item.metode === 'manual' ? 'Manual' :
-                   item.metode === 'otomatis' ? 'Otomatis' : '-';
+  const waktu = new Date(item.waktu);
 
-    tbody.innerHTML += `
-      <tr class="border-t">
-        <td class="px-4 py-2 text-center">${index + 1}</td>
-        <td class="px-4 py-2">${tanggal}</td>
-        <td class="px-4 py-2">${jam}</td>
-        <td class="px-4 py-2">${item.kelembapan}%</td>
-        <td class="px-4 py-2">${durasi}</td>
-        <td class="px-4 py-2">${metode}</td>
-      </tr>
-    `;
+  const tanggal = waktu.toLocaleDateString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit'
   });
+
+  const jam = waktu.toLocaleTimeString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  const durasi = item.durasi_detik || 0;
+  const metode = item.metode === 'manual' ? 'Manual' :
+                 item.metode === 'otomatis' ? 'Otomatis' : '-';
+
+  tbody.innerHTML += `
+    <tr class="border-t">
+      <td class="px-4 py-2 text-center">${index + 1}</td>
+      <td class="px-4 py-2">${tanggal}</td>
+      <td class="px-4 py-2">${jam}</td>
+      <td class="px-4 py-2">${item.kelembapan}%</td>
+      <td class="px-4 py-2">${durasi}</td>
+      <td class="px-4 py-2">${metode}</td>
+    </tr>
+  `;
+});
 }
 
 // ✅ Variabel global untuk Chart.js
