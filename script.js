@@ -21,25 +21,41 @@ function formatWaktuTanpaKonversi(isoString) {
 function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
   if (!tbody) {
-    console.error("Element tabelKelembapan atau tbody tidak ditemukan");
+    console.error('Element tabelKelembapan tidak ditemukan');
     return;
   }
 
+  // Data terbaru paling atas
+  const reversedData = [...data].reverse();
+
   tbody.innerHTML = '';
 
-  const reversedData = [...data].reverse();
   reversedData.forEach((item, index) => {
-    const waktu = formatWaktuTanpaKonversi(item.waktu);
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${waktu.tanggal}</td>
-      <td>${waktu.jam}</td>
-      <td>${item.kelembapan} %</td>
-      <td>${item.durasi} detik</td>
-      <td>${item.metode}</td>
+    const waktu = new Date(item.waktu);
+    const tanggal = waktu.toLocaleDateString('id-ID', {
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\//g, '/');
+
+    const jamFormatted = waktu.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).replace(/:/g, '.');
+
+    const row = `
+      <tr class="border">
+        <td class="border px-2 py-1">${index + 1}</td>
+        <td class="border px-2 py-1">${tanggal}</td>
+        <td class="border px-2 py-1">${jamFormatted}</td>
+        <td class="border px-2 py-1">${item.kelembapan}</td>
+        <td class="border px-2 py-1">${item.durasi_detik} detik</td>
+        <td class="border px-2 py-1">${item.metode}</td>
+      </tr>
     `;
-    tbody.appendChild(row);
+    tbody.innerHTML += row;
   });
 }
 
