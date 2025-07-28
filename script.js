@@ -27,21 +27,23 @@ function updateTabelKelembapan(data) {
 
   tbody.innerHTML = '';
 
-  const reversedData = [...data].reverse();
-  reversedData.forEach((item, index) => {
+  data.forEach((item, index) => {
     const waktu = formatWaktuTanpaKonversi(item.waktu);
     const row = document.createElement('tr');
+    row.classList.add('border');
+
     row.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${waktu.tanggal}</td>
-      <td>${waktu.jam}</td>
-      <td>${item.kelembapan} %</td>
-      <td>${item.durasi} detik</td>
-      <td>${item.metode}</td>
+      <td class="border px-4 py-2">${index + 1}</td>
+      <td class="border px-4 py-2">${waktu.tanggal}</td>
+      <td class="border px-4 py-2">${waktu.jam}</td>
+      <td class="border px-4 py-2">${item.kelembapan} %</td>
+      <td class="border px-4 py-2">${item.durasi} detik</td>
+      <td class="border px-4 py-2">${item.metode}</td>
     `;
     tbody.appendChild(row);
   });
 }
+
 
 // Fungsi update grafik
 function updateChart(data) {
