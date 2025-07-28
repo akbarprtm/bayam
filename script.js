@@ -4,25 +4,6 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Fungsi konversi waktu ke zona WIB
-function formatWaktuWIB(utcString) {
-  const waktu = new Date(utcString);
-  return {
-    tanggal: waktu.toLocaleDateString('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      day: '2-digit',
-      month: '2-digit',
-      year: '2-digit'
-    }),
-    jam: waktu.toLocaleTimeString('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    })
-  };
-}
 
 // Variabel global untuk Chart
 let kelembapanChart = null;
@@ -34,7 +15,7 @@ function updateTabelKelembapan(data) {
 
   data.slice().reverse().forEach((item, index) => {
     const waktu = formatWaktuWIB(item.waktu);
-    const durasi = item.durasi_detik || 0;
+    const durasi = item.durasi || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
 
