@@ -98,6 +98,15 @@ async function fetchLatestData() {
     console.error('Gagal mengambil data:', error.message);
     return;
   }
+  // Ambil data kelembapan terbaru untuk ditampilkan
+  if (data.length > 0) {
+    const kelembapanSekarangEl = document.getElementById('kelembapanSekarang');
+    if (kelembapanSekarangEl) {
+      kelembapanSekarangEl.textContent = data[0].kelembapan;
+    } else {
+      console.warn('Element kelembapanSekarang tidak ditemukan');
+    }
+  }
 
   updateTabelKelembapan(data);
   updateChart(data);
