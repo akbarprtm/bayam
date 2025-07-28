@@ -4,16 +4,19 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Fungsi konversi UTC ke WIB
+// ✅ Fungsi untuk konversi waktu UTC ke WIB dengan benar
 function konversiWaktuUTCkeWIB(utcString) {
   const waktuUTC = new Date(utcString);
 
+  // Format tanggal (27/07/25)
   const formatterTanggal = new Intl.DateTimeFormat('id-ID', {
     timeZone: 'Asia/Jakarta',
     day: '2-digit',
     month: '2-digit',
     year: '2-digit'
   });
+
+  // Format jam (13.43.00)
   const formatterJam = new Intl.DateTimeFormat('id-ID', {
     timeZone: 'Asia/Jakarta',
     hour: '2-digit',
@@ -21,21 +24,20 @@ function konversiWaktuUTCkeWIB(utcString) {
     second: '2-digit',
     hour12: false
   });
+
   const tanggal = formatterTanggal.format(waktuUTC);
-  const jam = formatterJam.format(waktuUTC);
+  const jam = formatterJam.format(waktuUTC).replaceAll(':', '.');
 
   return { tanggal, jam };
 }
 
-
-// Update isi tabel
+// ✅ Update isi tabel dengan data terbaru
 function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
   tbody.innerHTML = '';
 
   data.slice().reverse().forEach((item, index) => {
     const { tanggal, jam } = konversiWaktuUTCkeWIB(item.waktu);
-
     const durasi = item.durasi || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
@@ -53,16 +55,14 @@ function updateTabelKelembapan(data) {
   });
 }
 
-// Variabel Chart.js
+// ✅ Variabel global untuk Chart.js
 let kelembapanChart = null;
 
-// Fungsi update grafik
+// ✅ Fungsi untuk update grafik Chart.js
 function updateChart(data) {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
 
-  if (kelembapanChart) {
-    kelembapanChart.destroy();
-  }
+  if (kelembapanChart) kelembapanChart.destroy();
 
   const labels = data.map(item => konversiWaktuUTCkeWIB(item.waktu).jam);
   const values = data.map(item => item.kelembapan);
@@ -92,7 +92,7 @@ function updateChart(data) {
   });
 }
 
-// Ambil data dan update UI
+// ✅ Ambil data terbaru dari Supabase dan tampilkan
 async function fetchLatestData() {
   const { data, error } = await supabase
     .from('data')
@@ -109,11 +109,8 @@ async function fetchLatestData() {
   updateChart(data);
 }
 
-// Panggil awal saat halaman dimuat
+// ✅ Panggil saat pertama kali halaman dimuat
 fetchLatestData();
 
-// Refresh otomatis tiap 5 detik
-setInterval(() => {
-  fetchLatestData();
-}, 5000);
-
+// ✅ Refresh otomatis setiap 5 detik
+setInterval(fetchLatestData, 5000);
