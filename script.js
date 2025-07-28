@@ -4,57 +4,63 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Fungsi konversi waktu ke zona WIB
+function formatWaktuWIB(utcString) {
+  const waktu = new Date(utcString);
+  return {
+    tanggal: waktu.toLocaleDateString('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit'
+    }),
+    jam: waktu.toLocaleTimeString('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    })
+  };
+}
 
-// ✅ Update isi tabel dengan data terbaru
+// Variabel global untuk Chart
+let kelembapanChart = null;
+
+// Fungsi update tabel kelembapan
 function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
   tbody.innerHTML = '';
 
   data.slice().reverse().forEach((item, index) => {
-  const waktu = new Date(item.waktu);
+    const waktu = formatWaktuWIB(item.waktu);
+    const durasi = item.durasi_detik || 0;
+    const metode = item.metode === 'manual' ? 'Manual' :
+                   item.metode === 'otomatis' ? 'Otomatis' : '-';
 
-  const tanggal = waktu.toLocaleDateString('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit'
+    tbody.innerHTML += `
+      <tr class="border-t">
+        <td class="px-4 py-2 text-center">${index + 1}</td>
+        <td class="px-4 py-2">${waktu.tanggal}</td>
+        <td class="px-4 py-2">${waktu.jam}</td>
+        <td class="px-4 py-2">${item.kelembapan}%</td>
+        <td class="px-4 py-2">${durasi}</td>
+        <td class="px-4 py-2">${metode}</td>
+      </tr>
+    `;
   });
-
-  const jam = waktu.toLocaleTimeString('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-
-  const durasi = item.durasi_detik || 0;
-  const metode = item.metode === 'manual' ? 'Manual' :
-                 item.metode === 'otomatis' ? 'Otomatis' : '-';
-
-  tbody.innerHTML += `
-    <tr class="border-t">
-      <td class="px-4 py-2 text-center">${index + 1}</td>
-      <td class="px-4 py-2">${tanggal}</td>
-      <td class="px-4 py-2">${jam}</td>
-      <td class="px-4 py-2">${item.kelembapan}%</td>
-      <td class="px-4 py-2">${durasi}</td>
-      <td class="px-4 py-2">${metode}</td>
-    </tr>
-  `;
-});
 }
 
-// ✅ Variabel global untuk Chart.js
-let kelembapanChart = null;
-
-// ✅ Fungsi untuk update grafik Chart.js
+// Fungsi update grafik Chart.js
 function updateChart(data) {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
 
-  if (kelembapanChart) kelembapanChart.destroy();
+  // Hapus chart sebelumnya jika ada
+  if (kelembapanChart) {
+    kelembapanChart.destroy();
+  }
 
-  const labels = data.map(item => konversiWaktuUTCkeWIB(item.waktu).jam);
+  const labels = data.map(item => formatWaktuWIB(item.waktu).jam);
   const values = data.map(item => item.kelembapan);
 
   kelembapanChart = new Chart(ctx, {
@@ -82,7 +88,7 @@ function updateChart(data) {
   });
 }
 
-// ✅ Ambil data terbaru dari Supabase dan tampilkan
+// Fungsi fetch data terbaru
 async function fetchLatestData() {
   const { data, error } = await supabase
     .from('data')
@@ -99,8 +105,8 @@ async function fetchLatestData() {
   updateChart(data);
 }
 
-// ✅ Panggil saat pertama kali halaman dimuat
+// Panggil saat pertama kali
 fetchLatestData();
 
-// ✅ Refresh otomatis setiap 5 detik
+// Refresh otomatis setiap 5 detik
 setInterval(fetchLatestData, 5000);
