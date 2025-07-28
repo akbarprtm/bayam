@@ -6,22 +6,24 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let kelembapanChart = null;
 
+function formatWaktuTanpaKonversi(isoString) {
+  const [tanggalPart, waktuPart] = isoString.split('T');
+  const [tahun, bulan, hari] = tanggalPart.split('-');
+  const [jam, menit, detik] = waktuPart.split(':');
+
+  return {
+    tanggal: `${hari}/${bulan}/${tahun.slice(2)}`,
+    jam: `${jam}.${menit}.${detik.slice(0, 2)}`
+  };
+}
+
 // Fungsi update tabel kelembapan
 function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
   tbody.innerHTML = '';
 
   data.slice().reverse().forEach((item, index) => {
-    const waktu = new Date(item.waktu);
-    const tanggal = waktu.toLocaleDateString('id-ID', {
-      day: '2-digit', month: '2-digit', year: '2-digit',
-      timeZone: 'Asia/Jakarta'
-    });
-    const jam = waktu.toLocaleTimeString('id-ID', {
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      hour12: false,
-      timeZone: 'Asia/Jakarta'
-    });
+    const waktu = formatWaktuTanpaKonversi(item.waktu);
 
     const durasi = item.durasi || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
@@ -30,8 +32,8 @@ function updateTabelKelembapan(data) {
     tbody.innerHTML += `
       <tr class="border-t">
         <td class="px-4 py-2 text-center">${index + 1}</td>
-        <td class="px-4 py-2">${tanggal}</td>
-        <td class="px-4 py-2">${jam}</td>
+        <td class="px-4 py-2">${waktu.tanggal}</td>
+        <td class="px-4 py-2">${waktu.jam}</td>
         <td class="px-4 py-2">${item.kelembapan}%</td>
         <td class="px-4 py-2">${durasi}</td>
         <td class="px-4 py-2">${metode}</td>
@@ -39,7 +41,6 @@ function updateTabelKelembapan(data) {
     `;
   });
 }
-
 
 // Fungsi update grafik Chart.js
 function updateChart(data) {
