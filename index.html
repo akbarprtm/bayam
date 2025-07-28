@@ -78,27 +78,35 @@
       downloadLink.click();
       document.body.removeChild(downloadLink);
     }
-
+  
     function exportTableToCSV(filename) {
-      const rows = document.querySelectorAll("#tabelKelembapan tr");
+      const table = document.querySelector("table");
       let csv = [];
-
+  
+      // Ambil baris header
+      const headers = Array.from(table.querySelectorAll("thead th")).map(th =>
+        `"${th.textContent.trim().replace(/"/g, '""')}"`
+      );
+      csv.push(headers.join(","));
+  
+      // Ambil baris data
+      const rows = table.querySelectorAll("tbody tr");
       for (const row of rows) {
-        const cols = row.querySelectorAll("td, th");
-        let rowData = [];
-        for (const col of cols) {
-          rowData.push('"' + col.innerText.replace(/"/g, '""') + '"');
-        }
+        const cols = row.querySelectorAll("td");
+        const rowData = Array.from(cols).map(td =>
+          `"${td.textContent.trim().replace(/"/g, '""')}"`
+        );
         csv.push(rowData.join(","));
       }
-
+  
       downloadCSV(csv.join("\n"), filename);
     }
-
+  
     function unduhCSV() {
       exportTableToCSV("data_kelembapan.csv");
     }
   </script>
+
 
   <!-- Script Utama -->
   <script type="module" src="script.js"></script>
