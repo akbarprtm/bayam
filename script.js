@@ -6,9 +6,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ✅ Fungsi untuk konversi waktu UTC ke WIB dengan benar
 function konversiWaktuUTCkeWIB(utcString) {
-  const waktuUTC = new Date(utcString);
+  // Pastikan dianggap UTC dengan menambahkan 'Z' jika belum ada
+  const waktuUTC = new Date(utcString.endsWith('Z') ? utcString : utcString + 'Z');
 
-  // Format tanggal (27/07/25)
   const formatterTanggal = new Intl.DateTimeFormat('id-ID', {
     timeZone: 'Asia/Jakarta',
     day: '2-digit',
@@ -16,7 +16,6 @@ function konversiWaktuUTCkeWIB(utcString) {
     year: '2-digit'
   });
 
-  // Format jam (13.43.00)
   const formatterJam = new Intl.DateTimeFormat('id-ID', {
     timeZone: 'Asia/Jakarta',
     hour: '2-digit',
@@ -26,10 +25,11 @@ function konversiWaktuUTCkeWIB(utcString) {
   });
 
   const tanggal = formatterTanggal.format(waktuUTC);
-  const jam = formatterJam.format(waktuUTC).replaceAll(':', '.');
+  const jam = formatterJam.format(waktuUTC);
 
   return { tanggal, jam };
 }
+
 
 // ✅ Update isi tabel dengan data terbaru
 function updateTabelKelembapan(data) {
