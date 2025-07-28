@@ -14,7 +14,6 @@ function konversiWaktuUTCkeWIB(utcString) {
     month: '2-digit',
     year: '2-digit'
   });
-  
   const formatterJam = new Intl.DateTimeFormat('id-ID', {
     timeZone: 'Asia/Jakarta',
     hour: '2-digit',
