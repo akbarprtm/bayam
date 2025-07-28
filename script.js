@@ -4,21 +4,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Variabel global untuk Chart
 let kelembapanChart = null;
-
-// Fungsi format waktu lokal WIB
-function formatWaktu(waktuStr) {
-  const waktu = new Date(waktuStr);
-  const tanggal = waktu.toLocaleDateString('id-ID', {
-    day: '2-digit', month: '2-digit', year: '2-digit'
-  });
-  const jam = waktu.toLocaleTimeString('id-ID', {
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hour12: false
-  });
-  return { tanggal, jam };
-}
 
 // Fungsi update tabel kelembapan
 function updateTabelKelembapan(data) {
@@ -26,7 +12,15 @@ function updateTabelKelembapan(data) {
   tbody.innerHTML = '';
 
   data.slice().reverse().forEach((item, index) => {
-    const waktu = formatWaktu(item.waktu);
+    const waktu = new Date(item.waktu);
+    const tanggal = waktu.toLocaleDateString('id-ID', {
+      day: '2-digit', month: '2-digit', year: '2-digit'
+    });
+    const jam = waktu.toLocaleTimeString('id-ID', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false
+    });
+
     const durasi = item.durasi || 0;
     const metode = item.metode === 'manual' ? 'Manual' :
                    item.metode === 'otomatis' ? 'Otomatis' : '-';
@@ -34,8 +28,8 @@ function updateTabelKelembapan(data) {
     tbody.innerHTML += `
       <tr class="border-t">
         <td class="px-4 py-2 text-center">${index + 1}</td>
-        <td class="px-4 py-2">${waktu.tanggal}</td>
-        <td class="px-4 py-2">${waktu.jam}</td>
+        <td class="px-4 py-2">${tanggal}</td>
+        <td class="px-4 py-2">${jam}</td>
         <td class="px-4 py-2">${item.kelembapan}%</td>
         <td class="px-4 py-2">${durasi}</td>
         <td class="px-4 py-2">${metode}</td>
@@ -48,13 +42,14 @@ function updateTabelKelembapan(data) {
 function updateChart(data) {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
 
-  // Hapus chart sebelumnya jika ada
   if (kelembapanChart) kelembapanChart.destroy();
 
   const labels = data.map(item => {
     const waktu = new Date(item.waktu);
     return waktu.toLocaleTimeString('id-ID', {
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
       hour12: false
     });
   });
