@@ -46,7 +46,7 @@ function updateTabelKelembapan(data) {
 
 
 // Fungsi update grafik Chart.js
- function updateChart(data) {
+function updateChart(data) {
   const ctx = document.getElementById('chartKelembapan').getContext('2d');
 
   if (kelembapanChart) kelembapanChart.destroy();
