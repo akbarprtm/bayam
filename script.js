@@ -4,179 +4,162 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let kelembapanChart = null;
 
-function formatWaktuTanpaKonversi(isoString) {
-  const [tanggalPart, waktuPart] = isoString.split('T');
-  const [tahun, bulan, hari] = tanggalPart.split('-');
-  const [jam, menit, detik] = waktuPart.split(':');
-  return {
-    tanggal: `${hari}/${bulan}/${tahun.slice(2)}`,
-    jam: `${jam}.${menit}.${detik.slice(0, 2)}`
-  };
-}
+  let kelembapanChart = null;
 
-function updateTabelKelembapan(data) {
-  const tbody = document.getElementById('tabelKelembapan');
-  if (!tbody) {
-    console.error("Element tabelKelembapan tidak ditemukan");
-    return;
+  // Format waktu ke lokal Indonesia
+  function formatWaktuTanpaKonversi(waktuString) {
+    const waktu = new Date(waktuString)
+    const tanggal = waktu.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+    const jam = waktu.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+    return { tanggal, jam }
   }
 
-  tbody.innerHTML = '';
+  // Ambil data dari tabel 'data' (untuk tabel HTML)
+  async function fetchDataKelembapan() {
+    const { data, error } = await supabase
+      .from('data')
+      .select('*')
+      .order('waktu', { ascending: false })
+      .limit(10)
 
-  data.forEach((item, index) => {
-    const waktu = formatWaktuTanpaKonversi(item.waktu);
-    const row = document.createElement('tr');
-    row.classList.add('border');
+    if (error) {
+      console.error('Gagal mengambil data kelembapan:', error.message)
+      return
+    }
 
-    row.innerHTML = `
-      <td class="border px-4 py-2">${index + 1}</td>
-      <td class="border px-4 py-2">${waktu.tanggal}</td>
-      <td class="border px-4 py-2">${waktu.jam}</td>
-      <td class="border px-4 py-2">${item.kelembapan} %</td>
-      <td class="border px-4 py-2">${item.durasi} detik</td>
-      <td class="border px-4 py-2">${item.metode}</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-// Ambil data kelembapan (hanya untuk tabel) dari tabel 'data'
-async function fetchDataKelembapan() {
-  const { data, error } = await supabase
-    .from('data')
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(10);
-
-  if (error) {
-    console.error('Gagal mengambil data kelembapan:', error.message);
-    return;
+    updateTabelKelembapan(data)
   }
 
-  updateTabelKelembapan(data);
-}
+  // Update tabel HTML
+  function updateTabelKelembapan(data) {
+    const tabelBody = document.getElementById('tabelKelembapan')
+    if (!tabelBody) return
 
-// Ambil data untuk grafik dari tabel 'log_kelembapan'
-async function updateChart() {
-  const { data, error } = await supabase
-    .from('log_kelembapan')
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(10);
+    tabelBody.innerHTML = ''
 
-  if (error) {
-    console.error('Gagal mengambil data log untuk grafik:', error.message);
-    return;
+    data.forEach(row => {
+      const waktu = formatWaktuTanpaKonversi(row.waktu)
+      const tr = document.createElement('tr')
+      tr.innerHTML = `
+        <td>${waktu.tanggal}<br>${waktu.jam}</td>
+        <td>${row.kelembapan}%</td>
+      `
+      tabelBody.appendChild(tr)
+    })
   }
 
-  const canvas = document.getElementById('chartKelembapan');
-  if (!canvas) {
-    console.error("Element chartKelembapan tidak ditemukan");
-    return;
-  }
-  const ctx = canvas.getContext('2d');
+  // Ambil data dari log_kelembapan (untuk grafik)
+  async function updateChartFromLog() {
+    const { data, error } = await supabase
+      .from('log_kelembapan')
+      .select('*')
+      .order('waktu', { ascending: false })
+      .limit(10)
 
-  if (kelembapanChart) kelembapanChart.destroy();
+    if (error) {
+      console.error('Gagal mengambil data log untuk grafik:', error.message)
+      return
+    }
 
-  const labels = data.map(item => {
-    const waktu = formatWaktuTanpaKonversi(item.waktu);
-    return [waktu.tanggal, waktu.jam];
-  });
+    const canvas = document.getElementById('chartKelembapan')
+    if (!canvas) {
+      console.error("Element chartKelembapan tidak ditemukan")
+      return
+    }
+    const ctx = canvas.getContext('2d')
 
-  const values = data.map(item => item.kelembapan);
+    if (kelembapanChart) kelembapanChart.destroy()
 
-  kelembapanChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Kelembapan (%)',
-        data: values,
-        borderColor: 'blue',
-        fill: false,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      animation: false,
-      scales: {
-        x: {
-          ticks: {
-            callback: function (value, index) {
-              const label = this.getLabelForValue(value);
-              return Array.isArray(label) ? label : [label];
+    const labels = data.map(item => {
+      const waktu = formatWaktuTanpaKonversi(item.waktu)
+      return [waktu.tanggal, waktu.jam]
+    })
+
+    const values = data.map(item => item.kelembapan)
+
+    kelembapanChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Kelembapan (%)',
+          data: values,
+          borderColor: 'blue',
+          fill: false,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        animation: false,
+        scales: {
+          x: {
+            ticks: {
+              callback: function (value, index) {
+                const label = this.getLabelForValue(value)
+                return Array.isArray(label) ? label : [label]
+              }
             }
+          },
+          y: {
+            beginAtZero: true,
+            max: 100
           }
-        },
-        y: {
-          beginAtZero: true,
-          max: 100
         }
       }
-    }
-  });
-}
-
-// Ambil data kelembapan (grafik + tabel) dari tabel 'data'
-async function fetchDataKelembapan() {
-  const { data, error } = await supabase
-    .from('data')
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(10);
-
-  if (error) {
-    console.error('Gagal mengambil data kelembapan:', error.message);
-    return;
+    })
   }
 
-  updateTabelKelembapan(data);
-  updateChart(data);
-}
+  // Ambil kelembapan terbaru dari log untuk menampilkan di atas
+  async function fetchDataLog() {
+    const { data, error } = await supabase
+      .from('log_kelembapan')
+      .select('*')
+      .order('waktu', { ascending: false })
+      .limit(1)
 
-// Ambil data terbaru dari tabel 'log'
-async function fetchDataLog() {
-  const { data, error } = await supabase
-    .from('log_kelembapan')
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(1);
-
-  if (error) {
-    console.error('Gagal mengambil data log:', error.message);
-    return;
-  }
-
-  if (data.length > 0) {
-    const latest = data[0];
-
-    const kelembapanSekarangEl = document.getElementById('kelembapanSekarang');
-    const waktuPenyiramanEl = document.getElementById('waktuPenyiraman');
-
-    if (kelembapanSekarangEl) {
-      kelembapanSekarangEl.textContent = latest.kelembapan;
+    if (error) {
+      console.error('Gagal mengambil log penyiraman:', error.message)
+      return
     }
 
-    if (waktuPenyiramanEl) {
-      const waktu = formatWaktuTanpaKonversi(latest.waktu);
-      waktuPenyiramanEl.textContent = `${waktu.tanggal} ${waktu.jam}`;
+    if (data.length > 0) {
+      const { kelembapan, waktu } = data[0]
+      const waktuFormat = formatWaktuTanpaKonversi(waktu)
+
+      const elemenKelembapan = document.getElementById('kelembapanSekarang')
+      const elemenWaktu = document.getElementById('waktuPenyiraman')
+
+      if (elemenKelembapan) elemenKelembapan.textContent = `${kelembapan}%`
+      if (elemenWaktu) elemenWaktu.innerHTML = `${waktuFormat.tanggal}<br>${waktuFormat.jam}`
     }
   }
-}
 
-// Jalankan saat halaman dimuat dan setiap 5 detik
-function startRealtimeFetch() {
-  fetchDataKelembapan();
-  fetchDataLog();
-  updateChart();
-  setInterval(() => {
-    fetchDataKelembapan();
-    fetchDataLog();
-    updateChart();
-  }, 5000);
+  // Jalankan update berkala
+  function startRealtimeFetch() {
+    fetchDataKelembapan()
+    fetchDataLog()
+    updateChartFromLog()
+
+    setInterval(() => {
+      fetchDataKelembapan()
+      fetchDataLog()
+      updateChartFromLog()
+    }, 5000)
+  }
+
+  // Mulai saat halaman siap
+  startRealtimeFetch()
+
 }
 
 startRealtimeFetch();
