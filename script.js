@@ -90,6 +90,57 @@ function updateChart(data) {
       }
     }
   });
+}function updateChart(logData) {
+  const canvas = document.getElementById('chartKelembapan');
+  if (!canvas) {
+    console.error("Element chartKelembapan tidak ditemukan");
+    return;
+  }
+  const ctx = canvas.getContext('2d');
+
+  // Hancurkan chart lama jika ada
+  if (kelembapanChart) kelembapanChart.destroy();
+
+  // Format label dan nilai dari tabel log_kelembapan
+  const labels = logData.map(item => {
+    const waktu = formatWaktuTanpaKonversi(item.waktu); // asumsikan waktu dalam format "YYYY-MM-DD HH:mm:ss"
+    return [waktu.tanggal, waktu.jam]; // return array agar tampil 2 baris: tanggal dan jam
+  });
+
+  const values = logData.map(item => item.kelembapan);
+
+  // Buat chart baru
+  kelembapanChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Kelembapan (%)',
+        data: values,
+        borderColor: 'blue',
+        fill: false,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: false,
+      scales: {
+        x: {
+          ticks: {
+            callback: function(value, index) {
+              const label = this.getLabelForValue(value);
+              return Array.isArray(label) ? label : [label]; // tampilkan array label agar 2 baris
+            }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          max: 100
+        }
+      }
+    }
+  });
 }
 
 // Ambil data kelembapan (grafik + tabel) dari tabel 'data'
