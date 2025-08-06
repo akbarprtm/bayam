@@ -42,55 +42,7 @@ function updateTabelKelembapan(data) {
   });
 }
 
-function updateChart(data) {
-  const canvas = document.getElementById('chartKelembapan');
-  if (!canvas) {
-    console.error("Element chartKelembapan tidak ditemukan");
-    return;
-  }
-  const ctx = canvas.getContext('2d');
-
-  if (kelembapanChart) kelembapanChart.destroy();
-
-  const labels = data.map(item => {
-    const waktu = formatWaktuTanpaKonversi(item.waktu);
-    return [waktu.tanggal, waktu.jam];
-  });
-
-  const values = data.map(item => item.kelembapan);
-
-  kelembapanChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Kelembapan (%)',
-        data: values,
-        borderColor: 'blue',
-        fill: false,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      animation: false,
-      scales: {
-        x: {
-          ticks: {
-            callback: function(value, index) {
-              const label = this.getLabelForValue(value);
-              return Array.isArray(label) ? label : [label];
-            }
-          }
-        },
-        y: {
-          beginAtZero: true,
-          max: 100
-        }
-      }
-    }
-  });
-}function updateChart(logData) {
+function updateChart(logData) {
   const canvas = document.getElementById('chartKelembapan');
   if (!canvas) {
     console.error("Element chartKelembapan tidak ditemukan");
@@ -152,12 +104,27 @@ async function fetchDataKelembapan() {
     .limit(10);
 
   if (error) {
-    console.error('Gagal mengambil data kelembapan:', error.message);
+    console.error('Gagal mengambil data penyiraman:', error.message);
     return;
   }
 
   updateTabelKelembapan(data);
-  updateChart(data);
+}
+
+// Ambil data kelembapan (grafik + tabel) dari tabel 'data'
+async function fetchDataKelembapan() {
+  const { data, error } = await supabase
+    .from('log_kelembapan')
+    .select('*')
+    .order('waktu', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error('Gagal mengambil data kelembapan:', error.message);
+    return;
+  }
+
+  updateChart(logData);
 }
 
 // Ambil data terbaru dari tabel 'log'
