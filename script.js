@@ -42,7 +42,35 @@ function updateTabelKelembapan(data) {
   });
 }
 
-function updateChart(data) {
+// Ambil data kelembapan (hanya untuk tabel) dari tabel 'data'
+async function fetchDataKelembapan() {
+  const { data, error } = await supabase
+    .from('data')
+    .select('*')
+    .order('waktu', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error('Gagal mengambil data kelembapan:', error.message);
+    return;
+  }
+
+  updateTabelKelembapan(data);
+}
+
+// Ambil data untuk grafik dari tabel 'log_kelembapan'
+async function updateChart() {
+  const { data, error } = await supabase
+    .from('log_kelembapan')
+    .select('*')
+    .order('waktu', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error('Gagal mengambil data log untuk grafik:', error.message);
+    return;
+  }
+
   const canvas = document.getElementById('chartKelembapan');
   if (!canvas) {
     console.error("Element chartKelembapan tidak ditemukan");
@@ -77,7 +105,7 @@ function updateChart(data) {
       scales: {
         x: {
           ticks: {
-            callback: function(value, index) {
+            callback: function (value, index) {
               const label = this.getLabelForValue(value);
               return Array.isArray(label) ? label : [label];
             }
@@ -143,9 +171,11 @@ async function fetchDataLog() {
 function startRealtimeFetch() {
   fetchDataKelembapan();
   fetchDataLog();
+  updateChart();
   setInterval(() => {
     fetchDataKelembapan();
     fetchDataLog();
+    updateChart();
   }, 5000);
 }
 
