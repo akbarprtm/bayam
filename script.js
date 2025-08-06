@@ -1,6 +1,7 @@
 const SUPABASE_URL = 'https://ctggbrmvubjggyxmmbse.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA';
 
+
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -17,8 +18,8 @@ function formatWaktuTanpaKonversi(isoString) {
   };
 }
 
-// Fungsi update tabel
-function updateTabelKelembapan(data) {
+// Fungsi update tabel log penyiraman
+function updateTabelLog(logData) {
   const tbody = document.getElementById('tabelKelembapan');
   if (!tbody) {
     console.error("Element tabelKelembapan atau tbody tidak ditemukan");
@@ -27,7 +28,7 @@ function updateTabelKelembapan(data) {
 
   tbody.innerHTML = '';
 
-  data.forEach((item, index) => {
+  logData.forEach((item, index) => {
     const waktu = formatWaktuTanpaKonversi(item.waktu);
     const row = document.createElement('tr');
     row.classList.add('border');
@@ -36,7 +37,6 @@ function updateTabelKelembapan(data) {
       <td class="border px-4 py-2">${index + 1}</td>
       <td class="border px-4 py-2">${waktu.tanggal}</td>
       <td class="border px-4 py-2">${waktu.jam}</td>
-      <td class="border px-4 py-2">${item.kelembapan} %</td>
       <td class="border px-4 py-2">${item.durasi} detik</td>
       <td class="border px-4 py-2">${item.metode}</td>
     `;
@@ -44,8 +44,7 @@ function updateTabelKelembapan(data) {
   });
 }
 
-
-// Fungsi update grafik
+// Fungsi update grafik kelembapan
 function updateChart(data) {
   const canvas = document.getElementById('chartKelembapan');
   if (!canvas) {
@@ -96,63 +95,52 @@ function updateChart(data) {
   });
 }
 
-async function ambilDataKelembapan(limit = 1) {
-  const { data, error } = await supabase
-    .from('log_kelembapan') // Tabel "data"
-    .select('*')
-    .order('waktu', { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error('Gagal mengambil data kelembapan:', error.message);
-    return [];
-  }
-
-  return data;
-}
-
-// Ambil data dari Supabase
+// Ambil data dari Supabase (data & log)
 async function fetchLatestData() {
-  const data = await ambilDataKelembapan(1);
-  if (data.length > 0) {
-    const kelembapanSekarangEl = document.getElementById('kelembapanSekarang');
-    kelembapanSekarangEl.textContent = `${data[0].kelembapan}%`;
-  }
-  
-  const { data, error } = await supabase
+  // Ambil kelembapan terbaru
+  const { data: kelembapanData, error: errorData } = await supabase
     .from('data')
     .select('*')
     .order('waktu', { ascending: false })
     .limit(10);
 
-  if (error) {
-    console.error('Gagal mengambil data:', error.message);
-    return;
+  if (errorData) {
+    console.error('Gagal mengambil data kelembapan:', errorData.message);
   }
-  // ⬇️ Ambil data dari tabel log_kelembapan untuk kelembapan terbaru & waktu
-  const logKelembapan = await ambilDataKelembapan(1); // hanya ambil 1 data terbaru
-  if (logKelembapan.length > 0) {
+
+  if (kelembapanData?.length > 0) {
     const kelembapanSekarangEl = document.getElementById('kelembapanSekarang');
     if (kelembapanSekarangEl) {
-      kelembapanSekarangEl.textContent = logKelembapan[0].kelembapan;
-    } else {
-      console.warn('Element kelembapanSekarang tidak ditemukan');
+      kelembapanSekarangEl.textContent = kelembapanData[0].kelembapan;
     }
 
     const waktuEl = document.getElementById('waktuPenyiraman');
     if (waktuEl) {
-      const waktuTerakhir = formatWaktuTanpaKonversi(logKelembapan[0].waktu);
+      const waktuTerakhir = formatWaktuTanpaKonversi(kelembapanData[0].waktu);
       waktuEl.textContent = `${waktuTerakhir.tanggal} ${waktuTerakhir.jam}`;
-    } else {
-      console.warn('Element waktuPenyiraman tidak ditemukan');
     }
-  } 
 
-  updateTabelKelembapan(data);
-  updateChart(data);
+    updateChart(kelembapanData);
+  }
+
+  // Ambil data log penyiraman
+  const { data: logData, error: errorLog } = await supabase
+    .from('log_kelembapan')
+    .select('*')
+    .order('waktu', { ascending: false })
+    .limit(10);
+
+  if (errorLog) {
+    console.error('Gagal mengambil data log:', errorLog.message);
+    return;
+  }
+
+  updateTabelLog(logData);
 }
 
-
 // Jalankan awal dan setiap 5 detik
+fetchLatestData();
+setInterval(fetchLatestData, 5000);
+
 fetchLatestData();
 setInterval(fetchLatestData, 5000);
