@@ -2,10 +2,11 @@ const SUPABASE_URL = 'https://ctggbrmvubjggyxmmbse.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA';
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 let kelembapanChart = null;
 
+// Format waktu dari ISO ke tampilan lokal
 function formatWaktuTanpaKonversi(isoString) {
   const [tanggalPart, waktuPart] = isoString.split('T');
   const [tahun, bulan, hari] = tanggalPart.split('-');
@@ -16,6 +17,7 @@ function formatWaktuTanpaKonversi(isoString) {
   };
 }
 
+// Update tabel dari data penyiraman (dari tabel 'data')
 function updateTabelKelembapan(data) {
   const tbody = document.getElementById('tabelKelembapan');
   if (!tbody) {
@@ -42,6 +44,7 @@ function updateTabelKelembapan(data) {
   });
 }
 
+// Update chart dari data log_kelembapan
 function updateChart(logData) {
   const canvas = document.getElementById('chartKelembapan');
   if (!canvas) {
@@ -50,18 +53,15 @@ function updateChart(logData) {
   }
   const ctx = canvas.getContext('2d');
 
-  // Hancurkan chart lama jika ada
   if (kelembapanChart) kelembapanChart.destroy();
 
-  // Format label dan nilai dari tabel log_kelembapan
   const labels = logData.map(item => {
-    const waktu = formatWaktuTanpaKonversi(item.waktu); // asumsikan waktu dalam format "YYYY-MM-DD HH:mm:ss"
-    return [waktu.tanggal, waktu.jam]; // return array agar tampil 2 baris: tanggal dan jam
+    const waktu = formatWaktuTanpaKonversi(item.waktu);
+    return [waktu.tanggal, waktu.jam];
   });
 
   const values = logData.map(item => item.kelembapan);
 
-  // Buat chart baru
   kelembapanChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -80,9 +80,9 @@ function updateChart(logData) {
       scales: {
         x: {
           ticks: {
-            callback: function(value, index) {
+            callback: function(value) {
               const label = this.getLabelForValue(value);
-              return Array.isArray(label) ? label : [label]; // tampilkan array label agar 2 baris
+              return Array.isArray(label) ? label : [label];
             }
           }
         },
@@ -95,7 +95,7 @@ function updateChart(logData) {
   });
 }
 
-// Ambil data kelembapan (grafik + tabel) dari tabel 'data'
+// Ambil data dari 'data' untuk tabel penyiraman
 async function fetchDataKelembapan() {
   const { data, error } = await supabase
     .from('data')
@@ -111,23 +111,23 @@ async function fetchDataKelembapan() {
   updateTabelKelembapan(data);
 }
 
-// Ambil data kelembapan (grafik + tabel) dari tabel 'data'
-async function fetchDataKelembapan() {
-  const { data, error } = await supabase
+// Ambil data log_kelembapan untuk grafik
+async function fetchLogKelembapan() {
+  const { data: logData, error } = await supabase
     .from('log_kelembapan')
     .select('*')
     .order('waktu', { ascending: false })
     .limit(10);
 
   if (error) {
-    console.error('Gagal mengambil data kelembapan:', error.message);
+    console.error('Gagal mengambil data log_kelembapan:', error.message);
     return;
   }
 
   updateChart(logData);
 }
 
-// Ambil data terbaru dari tabel 'log'
+// Ambil data terbaru dari log_kelembapan untuk angka & waktu realtime
 async function fetchDataLog() {
   const { data, error } = await supabase
     .from('log_kelembapan')
@@ -157,14 +157,18 @@ async function fetchDataLog() {
   }
 }
 
-// Jalankan saat halaman dimuat dan setiap 5 detik
+// Inisialisasi pengambilan data setiap 5 detik
 function startRealtimeFetch() {
   fetchDataKelembapan();
+  fetchLogKelembapan();
   fetchDataLog();
+
   setInterval(() => {
     fetchDataKelembapan();
+    fetchLogKelembapan();
     fetchDataLog();
   }, 5000);
 }
 
-startRealtimeFetch(); 
+startRealtimeFetch();
+
