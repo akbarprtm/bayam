@@ -1,11 +1,10 @@
-// File: pages/api/kelembapan.js
+import { createClient } from '@supabase/supabase-js'
 
-import { createClient } from '@supabase/supabase-js';
+// Ganti dengan kredensialmu
+const supabaseUrl = 'https://ctggbrmvubjggyxmmbse.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA' // HARUS yang service_role
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-const supabase = createClient(
-  'https://ctggbrmvubjggyxmmbse.supabase.co', // Ganti dengan URL Supabase kamu
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z2dicm12dWJqZ2d5eG1tYnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI1MTg0NywiZXhwIjoyMDYzODI3ODQ3fQ.6rVGqPTOCkhI14R12cRVSQfH0uF7ywzQIC7Dm-vSrZA'           // Gunakan Service Role Key (RAHASIA)
-);
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
