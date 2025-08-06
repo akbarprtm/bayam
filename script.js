@@ -96,9 +96,29 @@ function updateChart(data) {
   });
 }
 
+async function ambilDataKelembapan(limit = 1) {
+  const { data, error } = await supabase
+    .from('log_kelembapan') // Tabel "data"
+    .select('*')
+    .order('waktu', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Gagal mengambil data kelembapan:', error.message);
+    return [];
+  }
+
+  return data;
+}
 
 // Ambil data dari Supabase
 async function fetchLatestData() {
+  const data = await ambilDataKelembapan(1);
+  if (data.length > 0) {
+    const kelembapanSekarangEl = document.getElementById('kelembapanSekarang');
+    kelembapanSekarangEl.textContent = `${data[0].kelembapan}%`;
+  }
+  
   const { data, error } = await supabase
     .from('data')
     .select('*')
@@ -109,29 +129,29 @@ async function fetchLatestData() {
     console.error('Gagal mengambil data:', error.message);
     return;
   }
-  // Ambil data kelembapan terbaru untuk ditampilkan
-  if (data.length > 0) {
+  // ⬇️ Ambil data dari tabel log_kelembapan untuk kelembapan terbaru & waktu
+  const logKelembapan = await ambilDataKelembapan(1); // hanya ambil 1 data terbaru
+  if (logKelembapan.length > 0) {
     const kelembapanSekarangEl = document.getElementById('kelembapanSekarang');
     if (kelembapanSekarangEl) {
-      kelembapanSekarangEl.textContent = data[0].kelembapan;
+      kelembapanSekarangEl.textContent = logKelembapan[0].kelembapan;
     } else {
       console.warn('Element kelembapanSekarang tidak ditemukan');
     }
-  }
-  // Tampilkan waktu penyiraman terakhir
-  if (data.length > 0) {
+
     const waktuEl = document.getElementById('waktuPenyiraman');
     if (waktuEl) {
-      const waktuTerakhir = formatWaktuTanpaKonversi(data[0].waktu);
+      const waktuTerakhir = formatWaktuTanpaKonversi(logKelembapan[0].waktu);
       waktuEl.textContent = `${waktuTerakhir.tanggal} ${waktuTerakhir.jam}`;
     } else {
       console.warn('Element waktuPenyiraman tidak ditemukan');
     }
-  }
+  } 
 
   updateTabelKelembapan(data);
   updateChart(data);
 }
+
 
 // Jalankan awal dan setiap 5 detik
 fetchLatestData();
