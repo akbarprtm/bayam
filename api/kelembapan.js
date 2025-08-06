@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   }
 
   const { data, error } = await supabase
-    .from('log_kelembapan_saja')
+    .from('log_kelembapan')
     .insert([{ kelembapan, waktu }]);
 
   if (error) {
